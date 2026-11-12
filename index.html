@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="robots" content="noindex,nofollow">
-<title>الرائد في الرياضيات — فيديوهات الشرح</title>
+<title>منصة الرائد في الرياضيات — فيديوهات الشرح</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Reem+Kufi:wght@600;700&family=Cairo:wght@400;600;700&display=swap">
 <style>
 :root{--bg:#0a1630;--bg2:#10244a;--card:#14294f;--line:#27406e;--fg:#eef3ff;--mut:#9fb2d6;--gold:#f6d77a;--gold2:#e0b34a;--blue:#4aa3ff}
@@ -11,7 +11,7 @@ body{margin:0;background:radial-gradient(circle at 80% -10%,#1a3a72,var(--bg) 60
 a{color:inherit;text-decoration:none}
 header{background:linear-gradient(90deg,#0b2447,#19376d);border-bottom:3px solid var(--gold2);padding:12px max(16px,env(safe-area-inset-right)) 12px max(16px,env(safe-area-inset-left))}
 .hin{max-width:960px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
-.logo{font-family:'Reem Kufi',Cairo,sans-serif;font-size:28px;font-weight:700;color:var(--gold)}
+.logo{font-family:"Reem Kufi",Cairo,sans-serif;font-size:24px;font-weight:700;color:var(--gold)}
 .who{font-size:14px;color:#cfe3ff}
 main{max-width:960px;margin:0 auto;padding:18px max(16px,env(safe-area-inset-right)) 50px max(16px,env(safe-area-inset-left))}
 h1{font-family:'Reem Kufi',Cairo,sans-serif;font-size:28px;margin:6px 0 4px;text-wrap:balance}
@@ -114,7 +114,7 @@ footer{text-align:center;color:var(--mut);font-size:14px;padding:20px 16px 40px}
 .fcall{border-top:1px solid var(--line);margin-top:30px;padding-top:18px}
 .fcall p{margin:0 0 10px;color:var(--mut)}
 </style></head><body>
-<header><div class="hin"><a class="logo" href="#">الرائد في الرياضيات</a><div class="who">الأستاذ أنس القواسمة — 0781507070</div></div></header>
+<header><div class="hin"><a class="logo" href="#">منصة الرائد في الرياضيات</a><div class="who">الأستاذ أنس القواسمة — 0781507070</div></div></header>
 <main id="app"></main>
 <footer><div class="fcall"><p>للاستفسار أو الحجز تواصل مع الأستاذ أنس القواسمة</p>
 <div class="wa"><a class="num" href="tel:+962781507070">0781507070</a>
@@ -131,8 +131,8 @@ const book=k=>DATA.find(b=>b.key===k);
 function item(b,v,cur){return '<a class="vi'+(v.id===cur?' on':'')+'" href="#'+b.key+'-'+v.id+'"><span class="id">'+v.id+'</span><span class="t">'+esc(v.t)+'</span>'+(v.k==='ext'?'<span class="tag">مثال إضافي</span>':'')+'</a>'}
 const ICON={f3:['١','#4aa3ff'],s3:['٢','#f6d77a'],b2:['٪','#5fd6a3']};
 function home(){
- document.title='الرائد في الرياضيات';
- let s='<div class="hero"><div class="tx"><small>الأستاذ</small><h1>أنس القواسمة</h1><p>الرائد في الرياضيات</p></div><div class="ph"><img src="assets/anas.webp" alt="الأستاذ أنس القواسمة"></div></div>'
+ document.title='منصة الرائد في الرياضيات';
+ let s='<div class="hero"><div class="tx"><small>الأستاذ</small><h1>أنس القواسمة</h1><p>منصة الرائد في الرياضيات</p></div><div class="ph"><img src="assets/anas.webp" alt="الأستاذ أنس القواسمة"></div></div>'
  +'<h2 class="gh">🎬 فيديوهات شرح الدوسيات</h2><p class="sub">اختر صفّك، أو صوّر الباركود الموجود بجانب أي سؤال في الدوسية ليفتح لك شرحه مباشرة.</p><div class="books">';
  DATA.forEach(b=>{s+='<a class="sec" href="#'+b.key+'"><b>'+esc(b.title)+'</b><span>'+esc(b.unit)+'</span><div class="acts one"><span class="a1">🎬 '+AR(b.videos.length)+' فيديو</span></div></a>'});
  s+='</div><h2 class="gh">📝 الاختبارات</h2><p class="sub">اختبارات كل صف في قسم خاص فيه.</p><div class="books">';
@@ -161,7 +161,7 @@ function tests(b,u){
  fetch('https://api.github.com/repos/'+REPO+'/contents/tests/'+dir).then(r=>r.ok?r.json():[]).then(j=>{const f=Array.isArray(j)?j.filter(x=>x.type==='file').map(x=>x.name):[];try{sessionStorage.setItem('t-'+dir,JSON.stringify({t:Date.now(),f}))}catch(e){}show(f)}).catch(()=>{box.innerHTML='<div class="empty">تعذّر تحميل القائمة، حاول مرة ثانية.</div>'});
 }
 function shelf(b,q){
- document.title=b.title+' — الرائد في الرياضيات';
+ document.title=b.title+' — منصة الرائد في الرياضيات';
  q=(q||'').trim().toLowerCase();
  let s='<div class="crumb"><a href="#">الرئيسية</a> ‹ '+esc(b.title)+'</div><h1>'+esc(b.title)+'</h1><p class="sub">'+esc(b.unit)+'</p><input class="search" id="q" type="search" placeholder="ابحث برقم السؤال أو بعنوانه…" value="'+esc(q)+'">';
  let any=false;
@@ -174,7 +174,7 @@ function shelf(b,q){
  inp.addEventListener('input',()=>{const pos=inp.selectionStart;const keep=inp.value;shelf(b,keep);const n=document.getElementById('q');n.focus();n.setSelectionRange(pos,pos)});
 }
 function player(b,v){
- document.title=v.t+' — الرائد في الرياضيات';
+ document.title=v.t+' — منصة الرائد في الرياضيات';
  const same=b.videos.filter(x=>x.l===v.l);const i=same.findIndex(x=>x.id===v.id);
  const prev=same[i-1],next=same[i+1];
  const src='v/'+b.key+'/'+(v.a||v.id)+'.mp4';
