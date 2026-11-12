@@ -37,6 +37,18 @@ video{width:100%;height:100%;display:block;background:#000}
 .btn.on{background:var(--gold);color:#0a1630;border-color:var(--gold);font-weight:700}
 .nav{display:flex;gap:8px;margin:12px 0}.nav a{flex:1;text-align:center}
 .note{background:#0d1d3c;border:1px dashed var(--line);border-radius:12px;padding:10px 14px;color:var(--mut);font-size:15px;margin:10px 0}
+.hero{position:relative;border-radius:18px;overflow:hidden;margin:0 0 18px;border:1px solid var(--line);background:linear-gradient(135deg,#0b2447,#19376d 60%,#2a4f94);min-height:170px;display:flex;align-items:flex-end}
+.hero img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.hero .ov{position:relative;width:100%;padding:60px 18px 16px;background:linear-gradient(0deg,rgba(6,14,32,.92),rgba(6,14,32,0))}
+.hero h1{margin:0;color:var(--gold);font-size:30px}.hero p{margin:2px 0 0;color:#dbe8ff}
+.sec{background:var(--card);border:1px solid var(--line);border-top:4px solid var(--gold2);border-radius:14px;padding:16px}
+.sec b{display:block;font-family:'Reem Kufi',Cairo;font-size:22px;color:var(--gold)}
+.sec span{display:block;color:var(--mut);font-size:15px}
+.acts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+.acts a{text-align:center;border-radius:10px;padding:9px 6px;font-weight:700;font-size:15px}
+.a1{background:var(--gold);color:#0a1630}.a2{background:#0d1d3c;border:1px solid var(--gold2);color:var(--gold)}
+.tf{display:flex;gap:10px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.tf:hover{border-color:var(--gold)}.tf .ic{font-size:22px}.tf .t{flex:1;min-width:0}.tf small{color:var(--mut)}
 footer{text-align:center;color:var(--mut);font-size:14px;padding:20px 16px 40px}
 .empty{padding:30px;text-align:center;color:var(--mut)}
 </style></head><body>
@@ -51,10 +63,23 @@ const AR=n=>String(n).replace(/\d/g,d=>'٠١٢٣٤٥٦٧٨٩'[d]);
 const book=k=>DATA.find(b=>b.key===k);
 function item(b,v,cur){return '<a class="vi'+(v.id===cur?' on':'')+'" href="#'+b.key+'-'+v.id+'"><span class="id">'+v.id+'</span><span class="t">'+esc(v.t)+'</span>'+(v.k==='ext'?'<span class="tag">مثال إضافي</span>':'')+'</a>'}
 function home(){
- document.title='الرائد في الرياضيات — فيديوهات الشرح';
- let s='<h1>فيديوهات شرح الأسئلة</h1><p class="sub">اختر صفّك وكتابك من الأقسام التالية، أو صوّر الباركود الموجود بجانب أي سؤال في الدوسية ليفتح لك شرحه مباشرة.</p><div class="books">';
- DATA.forEach(b=>{s+='<a class="book" href="#'+b.key+'"><b>'+esc(b.title)+'</b><span>'+esc(b.unit)+'</span><em>'+AR(b.videos.length)+' فيديو</em></a>'});
+ document.title='الرائد في الرياضيات';
+ let s='<div class="hero"><img src="assets/cover.jpg" alt="" onerror="this.remove()"><div class="ov"><h1>الرائد في الرياضيات</h1><p>الأستاذ أنس القواسمة — شرح بالفيديو واختبارات</p></div></div>'
+ +'<p class="sub">اختر صفّك. وتقدر كمان تصوّر الباركود الموجود بجانب أي سؤال في الدوسية ليفتح لك شرحه مباشرة.</p><div class="books">';
+ DATA.forEach(b=>{s+='<div class="sec"><b>'+esc(b.title)+'</b><span>'+esc(b.unit)+'</span><div class="acts"><a class="a1" href="#'+b.key+'">🎬 فيديوهات ('+AR(b.videos.length)+')</a><a class="a2" href="#t-'+b.key+'">📝 الاختبارات</a></div></div>'});
  app.innerHTML=s+'</div>';
+}
+const REPO='anassamerqawasmeh0000-max/Anas.qawasmeh.math';
+function tests(b){
+ document.title='اختبارات '+b.title;
+ app.innerHTML='<div class="crumb"><a href="#">الرئيسية</a> ‹ اختبارات</div><h1>اختبارات — '+esc(b.title)+'</h1><p class="sub">اضغط على الاختبار ليفتح، ومنه تقدر تحمّله أو تطبعه.</p><div id="tl" class="list"><div class="empty">جاري التحميل…</div></div>';
+ const box=document.getElementById('tl');
+ const show=fs=>{fs=fs.filter(f=>/\.(pdf|png|jpe?g|html?|docx?)$/i.test(f)).sort((x,y)=>x.localeCompare(y,'ar',{numeric:true}));
+  box.innerHTML=fs.length?fs.map(f=>{const n=f.replace(/\.[^.]+$/,'').replace(/_/g,' ');const e=(f.split('.').pop()||'').toUpperCase();
+   return '<a class="tf" target="_blank" rel="noopener" href="tests/'+b.key+'/'+encodeURIComponent(f)+'"><span class="ic">📄</span><span class="t">'+esc(n)+'</span><small>'+esc(e)+'</small></a>'}).join(''):'<div class="empty">ما في اختبارات مرفوعة لهذا القسم حالياً. تابعنا قريباً.</div>'};
+ let c=null;try{c=JSON.parse(sessionStorage.getItem('t-'+b.key))}catch(e){}
+ if(c&&Date.now()-c.t<120000)return show(c.f);
+ fetch('https://api.github.com/repos/'+REPO+'/contents/tests/'+b.key).then(r=>r.ok?r.json():[]).then(j=>{const f=Array.isArray(j)?j.filter(x=>x.type==='file').map(x=>x.name):[];try{sessionStorage.setItem('t-'+b.key,JSON.stringify({t:Date.now(),f}))}catch(e){}show(f)}).catch(()=>{box.innerHTML='<div class="empty">تعذّر تحميل القائمة، حاول مرة ثانية.</div>'});
 }
 function shelf(b,q){
  document.title=b.title+' — الرائد في الرياضيات';
@@ -87,6 +112,7 @@ function player(b,v){
 function render(){
  const h=decodeURIComponent(location.hash.replace('#',''));
  if(!h)return home();
+ const tm=h.match(/^t-([a-z0-9]+)$/i);if(tm){const tb=book(tm[1]);return tb?tests(tb):home()}
  const m=h.match(/^([a-z0-9]+?)(?:-(.+))?$/i);
  const b=m&&book(m[1]);
  if(!b)return home();
