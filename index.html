@@ -65,7 +65,7 @@ footer{text-align:center;color:var(--mut);font-size:14px;padding:20px 16px 40px}
 </style>
 <link rel="stylesheet" href="katex/katex.min.css">
 <style>
-.m{display:inline-block;max-width:100%;overflow-x:auto;overflow-y:hidden;vertical-align:middle;padding:0 2px}
+.m{display:inline-block;max-width:100%;vertical-align:middle;padding:2px}
 .qz-card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px}
 .qz-top{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin:6px 0 10px}
 .qz-bar{height:8px;background:#0d1d3c;border-radius:8px;overflow:hidden;margin-bottom:14px}.qz-bar i{display:block;height:100%;background:linear-gradient(90deg,var(--gold2),var(--gold));width:0;transition:width .25s}
@@ -76,7 +76,7 @@ footer{text-align:center;color:var(--mut);font-size:14px;padding:20px 16px 40px}
 .ops{display:grid;gap:9px}
 .op{display:flex;align-items:center;gap:12px;text-align:right;background:#0f2144;border:1.5px solid var(--line);color:var(--fg);border-radius:12px;padding:10px 12px;font:inherit;font-size:17px;cursor:pointer;min-height:54px;width:100%}
 .op b{flex:none;display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:var(--gold2);color:#0a1630;font-family:system-ui;font-size:15px}
-.op span{flex:1;min-width:0;overflow-x:auto}
+.op>span{flex:1;min-width:0;padding:4px 0}.op.cs{flex-direction:column;align-items:flex-start;gap:2px}.op.cs>span{padding:2px 0 6px;width:100%;text-align:center}.op.cs .m{font-size:.85em}.op.cs .katex .base{width:auto}
 .op.sel{border-color:var(--gold);background:#1b3466;box-shadow:0 0 0 2px var(--gold) inset}
 .op.ok{border-color:#2fbf80;background:#12382f}.op.bad{border-color:#e5584f;background:#3b1a22}
 .qnav{display:flex;gap:8px;margin-top:14px}.qnav .btn{flex:1;text-align:center;padding:11px 8px}
@@ -213,7 +213,7 @@ function qrun(){
  app.innerHTML='<div class="qz-top"><span class="pill">سؤال '+N(ST.i+1)+' من '+N(n)+'</span><span class="pill" id="tm">⏱ --:--</span><span class="pill">أجبت '+N(done)+'</span></div>'
  +'<div class="qz-bar"><i style="width:'+(done/n*100)+'%"></i></div>'
  +'<div class="qz-card"><div class="qt"><span class="qn">'+N(q.n)+'</span>'+q.q+'</div>'+(q.fig?'<img class="qfig" src="'+q.fig+'" alt="">':'')
- +'<div class="ops">'+['a','b','c','d'].filter(k=>q.opts[k]!=null).map(k=>'<button class="op'+(sel===k?' sel':'')+'" data-k="'+k+'"><b>'+k+'</b><span>'+q.opts[k]+'</span></button>').join('')+'</div></div>'
+ +'<div class="ops">'+['a','b','c','d'].filter(k=>q.opts[k]!=null).map(k=>'<button class="op'+(q.opts[k].indexOf('mtable')>=0?' cs':'')+(sel===k?' sel':'')+'" data-k="'+k+'"><b>'+k+'</b><span>'+q.opts[k]+'</span></button>').join('')+'</div></div>'
  +'<div class="qnav"><button class="btn" id="pv"'+(ST.i?'':' disabled style="opacity:.4"')+'>› السابق</button><button class="btn" id="gr">☰ الأسئلة</button>'+(ST.i<n-1?'<button class="btn gold" id="nx">التالي ‹</button>':'<button class="btn gold" id="fin">إنهاء وتسليم</button>')+'</div>'
  +'<div class="qnav"><button class="btn red" id="fin2">إنهاء وتسليم الاختبار</button></div><div id="gw"></div>';
  app.querySelectorAll('.op').forEach(b=>b.onclick=()=>{const k=b.dataset.k;if(ST.a[q.n]===k)delete ST.a[q.n];else ST.a[q.n]=k;LS.set('qz-'+Q.id,ST);const y=scrollY;qrun();scrollTo(0,y)});
@@ -245,7 +245,7 @@ function qresult(f){
  +'<div class="sh">مراجعة الأسئلة وطريقة الحل</div><div class="chips"><button class="chip'+(f==='all'?' on':'')+'" data-f="all">الكل ('+N(n)+')</button><button class="chip'+(f==='bad'?' on':'')+'" data-f="bad">الأخطاء ('+N(bad)+')</button><button class="chip'+(f==='no'?' on':'')+'" data-f="no">بدون إجابة ('+N(no)+')</button></div>'
  +(list.length?list.map(q=>{const a=ST.a[q.n],c=a===q.ans?'ok':a?'bad':'no';
   return '<details class="rv '+c+'" id="r'+q.n+'"'+(f!=='all'?' open':'')+'><summary><span class="qn">'+N(q.n)+'</span><span style="flex:1">'+(c==='ok'?'✅ إجابتك صحيحة':c==='bad'?'❌ إجابتك خاطئة':'➖ لم تجب')+'</span><small style="color:var(--mut)">'+(a?'إجابتك: '+a+' — ':'')+'الصحيحة: '+q.ans+'</small></summary><div class="bd"><div class="qt">'+q.q+'</div>'+(q.fig?'<img class="qfig" src="'+q.fig+'" alt="">':'')
-  +'<div class="ops">'+['a','b','c','d'].filter(k=>q.opts[k]!=null).map(k=>'<div class="op '+(k===q.ans?'ok':k===a?'bad':'')+'"><b>'+k+'</b><span>'+q.opts[k]+'</span></div>').join('')+'</div>'
+  +'<div class="ops">'+['a','b','c','d'].filter(k=>q.opts[k]!=null).map(k=>'<div class="op '+(q.opts[k].indexOf('mtable')>=0?'cs ':'')+(k===q.ans?'ok':k===a?'bad':'')+'"><b>'+k+'</b><span>'+q.opts[k]+'</span></div>').join('')+'</div>'
   +'<div class="sol"><h4>طريقة الحل</h4><ol>'+q.sol.map(s=>'<li>'+s+'</li>').join('')+'</ol></div></div></details>'}).join(''):'<div class="empty">لا توجد أسئلة في هذا القسم 👏</div>')
  +'<div class="qnav"><button class="btn gold" id="again">🔁 حل الاختبار من جديد</button><a class="btn" href="#t-f3">رجوع للاختبارات</a></div>';
  app.querySelectorAll('[data-f]').forEach(b=>b.onclick=()=>qresult(b.dataset.f));
