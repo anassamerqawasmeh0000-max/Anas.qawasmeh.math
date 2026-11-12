@@ -130,28 +130,39 @@ const AR=n=>String(n).replace(/\d/g,d=>'٠١٢٣٤٥٦٧٨٩'[d]);
 const book=k=>DATA.find(b=>b.key===k);
 function item(b,v,cur){return '<a class="vi'+(v.id===cur?' on':'')+'" href="#'+b.key+'-'+v.id+'"><span class="id">'+v.id+'</span><span class="t">'+esc(v.t)+'</span>'+(v.k==='ext'?'<span class="tag">مثال إضافي</span>':'')+'</a>'}
 const ICON={f3:['١','#4aa3ff'],s3:['٢','#f6d77a'],b2:['٪','#5fd6a3']};
+const UNITS={
+ f3:{vu:3,u:[['الوحدة الأولى',''],['الوحدة الثانية','قياس الزاوية بالراديان · النسب المثلثية · تمثيل الجيب وجيب التمام'],['الوحدة الثالثة: النهايات والاتصال','']]},
+ s3:{vu:3,u:[['الوحدة الأولى: الاقترانات والمقادير الجبرية','نظريتا الباقي والعوامل · الكسور الجزئية'],['الوحدة الثانية: المتطابقات والمعادلات المثلثية','المتطابقات المثلثية · حلّ المعادلات المثلثية'],['الوحدة الثالثة: التفاضل وتطبيقاته','مشتقة اقترانات خاصة · الضرب والقسمة · السلسلة · الضمني · المعدلات المرتبطة'],['الوحدة الرابعة: الأعداد المُركَّبة','الأعداد المركّبة · العمليات عليها · المحل الهندسي']]},
+ b2:{vu:2,u:[['الوحدة الأولى',''],['الوحدة الثانية: الخوارزميات ونظرية المخططات',''],['الوحدة الثالثة','']]}
+};
+const GRADE={f3:['أول ثانوي','الرياضيات'],s3:['ثاني ثانوي متقدم','الرياضيات'],b2:['ثاني ثانوي أعمال','رياضيات الأعمال']};
 function home(){
  document.title='منصة الرائد في الرياضيات';
  let s='<div class="hero"><div class="tx"><small>الأستاذ</small><h1>أنس القواسمة</h1><p>منصة الرائد في الرياضيات</p></div><div class="ph"><img src="assets/anas.webp" alt="الأستاذ أنس القواسمة"></div></div>'
- +'<h2 class="gh">🎬 فيديوهات شرح الدوسيات</h2><p class="sub">اختر صفّك، أو صوّر الباركود الموجود بجانب أي سؤال في الدوسية ليفتح لك شرحه مباشرة.</p><div class="books">';
- DATA.forEach(b=>{s+='<a class="sec" href="#'+b.key+'"><b>'+esc(b.title)+'</b><span>'+esc(b.unit)+'</span><div class="acts one"><span class="a1">🎬 '+AR(b.videos.length)+' فيديو</span></div></a>'});
- s+='</div><h2 class="gh">📝 الاختبارات</h2><p class="sub">اختبارات كل صف في قسم خاص فيه.</p><div class="books">';
- DATA.forEach(b=>{const I=ICON[b.key]||['📝','#fff'];s+='<a class="ex" style="--c:'+I[1]+'" href="#t-'+b.key+'"><i>'+I[0]+'</i><div><b>اختبارات '+esc(b.title)+'</b><span>اضغط لعرض الاختبارات</span></div></a>'});
+ +'<h2 class="gh">اختر صفّك</h2><p class="sub">ادخل على صفّك لتجد وحداته، وفي كل وحدة الفيديوهات والاختبارات.</p><div class="books">';
+ DATA.forEach(b=>{const I=ICON[b.key]||['','#fff'],G=GRADE[b.key]||[b.title,''];s+='<a class="ex" style="--c:'+I[1]+'" href="#h-'+b.key+'"><i>'+I[0]+'</i><div><b>'+esc(G[0])+'</b><span>'+esc(G[1])+' — '+AR(UNITS[b.key].u.length)+' وحدات</span></div></a>'});
  app.innerHTML=s+'</div>';
 }
-const REPO='anassamerqawasmeh0000-max/Anas.qawasmeh.math';
-const UN=['الأولى','الثانية','الثالثة'];
-function units(b){
- document.title='اختبارات '+b.title;
- app.innerHTML='<div class="crumb"><a href="#">الرئيسية</a> ‹ اختبارات</div><h1>اختبارات — '+esc(b.title)+'</h1><p class="sub">اختر الوحدة:</p><div class="books" id="ul"></div>';
- const draw=L=>{document.getElementById('ul').innerHTML=UN.map((u,i)=>{const n=L.filter(x=>(x.unit||1)===i+1).length;const I=ICON[b.key]||['','#fff'];
-  return '<a class="ex" style="--c:'+I[1]+'" href="#t-'+b.key+'-u'+(i+1)+'"><i>'+(i+1)+'</i><div><b>الوحدة '+u+'</b><span>'+(n&&b.key==='f3'?AR(n)+' اختبارات تفاعلية + ملفات PDF':'اختبارات الوحدة '+u)+'</span></div></a>'}).join('')};
- draw([]);if(b.key==='f3')quizList().then(draw);
+function hub(b){
+ const G=GRADE[b.key],U=UNITS[b.key];document.title=G[0]+' — '+G[1];
+ app.innerHTML='<div class="crumb"><a href="#">الرئيسية</a> ‹ '+esc(G[0])+'</div><h1>'+esc(G[0])+' — '+esc(G[1])+'</h1><p class="sub">اختر الوحدة:</p><div class="books" id="ul"></div>';
+ const I=ICON[b.key]||['','#fff'];
+ document.getElementById('ul').innerHTML=U.u.map((u,i)=>'<a class="ex" style="--c:'+I[1]+'" href="#hu-'+b.key+'-'+(i+1)+'"><i>'+(i+1)+'</i><div><b>'+esc(u[0])+'</b><span>'+esc(u[1]||'فيديوهات واختبارات')+'</span></div></a>').join('');
 }
+function unitPage(b,n){
+ const G=GRADE[b.key],U=UNITS[b.key],u=U.u[n-1];document.title=u[0]+' — '+G[0];
+ let h='<div class="crumb"><a href="#">الرئيسية</a> ‹ <a href="#h-'+b.key+'">'+esc(G[0])+'</a> ‹ '+esc(u[0])+'</div><h1>'+esc(u[0])+'</h1><p class="sub">'+esc(G[0])+' — '+esc(G[1])+'</p><div class="books">';
+ const I=ICON[b.key]||['','#fff'];
+ if(U.vu===n)h+='<a class="ex" style="--c:'+I[1]+'" href="#'+b.key+'"><i>🎬</i><div><b>فيديوهات الشرح</b><span>'+AR(b.videos.length)+' فيديو</span></div></a>';
+ h+='<a class="ex" style="--c:'+I[1]+'" href="#t-'+b.key+'-u'+n+'"><i>📝</i><div><b>الاختبارات</b><span>اختبارات تفاعلية وملفات PDF</span></div></a></div>';
+ app.innerHTML=h;
+}
+const REPO='anassamerqawasmeh0000-max/Anas.qawasmeh.math';
+const UN=['الأولى','الثانية','الثالثة','الرابعة'];
 function tests(b,u){
  u=u||1;document.title='اختبارات الوحدة '+UN[u-1]+' — '+b.title;
- app.innerHTML='<div class="crumb"><a href="#">الرئيسية</a> ‹ <a href="#t-'+b.key+'">اختبارات '+esc(b.title)+'</a> ‹ الوحدة '+UN[u-1]+'</div><h1>الوحدة '+UN[u-1]+' — اختبارات</h1><p class="sub">'+esc(b.title)+'. اضغط على الاختبار ليفتح، ومنه تقدر تحمّله أو تطبعه.</p><div id="ql"></div><div class="sh">📄 اختبارات PDF للطباعة</div><div id="tl" class="list"><div class="empty">جاري التحميل…</div></div>';
- if(b.key==='f3')quizList().then(L=>{L=L.filter(x=>(x.unit||1)===u);if(!L.length)return;const card=x=>{const s=LS.get('qz-'+x.id);return '<a class="qc" href="#qz-'+x.id+'"><b>'+esc(x.title)+'</b><span>'+AR(x.count)+' سؤال — '+esc(x.time)+(s&&s.done?' — آخر نتيجة: '+AR(s.score)+'/'+AR(x.total):s&&s.start?' — متابعة':'')+'</span></a>'};const LN={1:'الدرس الأول: قياس الزاوية بالراديان',2:'الدرس الثاني: النسب المثلثية',3:'الدرس الثالث: اقترانا الجيب وجيب التمام'},LV=[['E','🟢 سهل'],['M','🟡 متوسط'],['H','🔴 صعب'],['X','⭐ اختبار شامل']];let h='<div class="sh">📝 اختبارات تفاعلية (تصحيح فوري مع شرح مفصل لكل سؤال)</div>';if(L.some(x=>x.lesson)){[1,2,3].forEach(n=>{const A=L.filter(x=>x.lesson===n);if(!A.length)return;h+='<details class="qg"><summary>'+LN[n]+' <small>('+AR(A.length)+' اختبارات)</small></summary>';LV.forEach(v=>{const B=A.filter(x=>x.level===v[0]);if(B.length)h+='<div class="lv">'+v[1]+'</div><div class="qlist">'+B.map(card).join('')+'</div>'});h+='</details>'});const R=L.filter(x=>!x.lesson);if(R.length)h+='<div class="qlist">'+R.map(card).join('')+'</div>'}else h+='<div class="qlist">'+L.map(card).join('')+'</div>';document.getElementById('ql').innerHTML=h});
+ app.innerHTML='<div class="crumb"><a href="#">الرئيسية</a> ‹ <a href="#h-'+b.key+'">'+esc(GRADE[b.key][0])+'</a> ‹ <a href="#hu-'+b.key+'-'+u+'">الوحدة '+UN[u-1]+'</a> ‹ الاختبارات</div><h1>الوحدة '+UN[u-1]+' — اختبارات</h1><p class="sub">'+esc(b.title)+'. اضغط على الاختبار ليفتح، ومنه تقدر تحمّله أو تطبعه.</p><div id="ql"></div><div class="sh">📄 اختبارات PDF للطباعة</div><div id="tl" class="list"><div class="empty">جاري التحميل…</div></div>';
+ quizList().then(L=>{L=L.filter(x=>(x.unit||1)===u&&(b.key==='f3'||x.unit===3&&b.key==='s3'));if(!L.length)return;const card=x=>{const s=LS.get('qz-'+x.id);return '<a class="qc" href="#qz-'+x.id+'"><b>'+esc(x.title)+'</b><span>'+AR(x.count)+' سؤال — '+esc(x.time)+(s&&s.done?' — آخر نتيجة: '+AR(s.score)+'/'+AR(x.total):s&&s.start?' — متابعة':'')+'</span></a>'};const LN=b.key==='s3'?{1:'الدرس الأول: مشتقات اقترانات خاصة',2:'الدرس الثاني: الضرب والقسمة والمشتقات العليا',3:'الدرس الثالث: قاعدة السلسلة',4:'الدرس الرابع: الاشتقاق الضمني',5:'الدرس الخامس: المعدلات المرتبطة'}:{1:'الدرس الأول: قياس الزاوية بالراديان',2:'الدرس الثاني: النسب المثلثية',3:'الدرس الثالث: اقترانا الجيب وجيب التمام'},LV=[['E','🟢 سهل'],['M','🟡 متوسط'],['H','🔴 صعب'],['X','⭐ اختبار شامل']];let h='<div class="sh">📝 اختبارات تفاعلية (تصحيح فوري مع شرح مفصل لكل سؤال)</div>';if(L.some(x=>x.lesson)){[1,2,3,4,5].forEach(n=>{const A=L.filter(x=>x.lesson===n);if(!A.length)return;h+='<details class="qg"><summary>'+LN[n]+' <small>('+AR(A.length)+' اختبارات)</small></summary>';LV.forEach(v=>{const B=A.filter(x=>x.level===v[0]);if(B.length)h+='<div class="lv">'+v[1]+'</div><div class="qlist">'+B.map(card).join('')+'</div>'});h+='</details>'});const R=L.filter(x=>!x.lesson);if(R.length)h+='<div class="qlist">'+R.map(card).join('')+'</div>'}else h+='<div class="qlist">'+L.map(card).join('')+'</div>';document.getElementById('ql').innerHTML=h});
  const box=document.getElementById('tl');const dir=b.key+'/u'+u;
  const show=fs=>{fs=fs.filter(f=>/\.(pdf|png|jpe?g|html?|docx?)$/i.test(f)).sort((x,y)=>x.localeCompare(y,'ar',{numeric:true}));
   box.innerHTML=fs.length?fs.map(f=>{const n=f.replace(/\.[^.]+$/,'').replace(/_/g,' ');const e=(f.split('.').pop()||'').toUpperCase();
@@ -267,7 +278,9 @@ function render(){
  if(!h)return home();
  const qm=h.match(/^qz-([A-Za-z0-9-]+)$/);if(qm){return qstart(qm[1])}
  clearInterval(TM);
- const tm=h.match(/^t-([a-z0-9]+?)(?:-u([123]))?$/i);if(tm){const tb=book(tm[1]);return tb?(tm[2]?tests(tb,+tm[2]):units(tb)):home()}
+ const hm=h.match(/^h-([a-z0-9]+)$/i);if(hm){const hb=book(hm[1]);return hb?hub(hb):home()}
+ const um=h.match(/^hu-([a-z0-9]+)-([1-4])$/i);if(um){const ub=book(um[1]);return ub&&+um[2]<=UNITS[ub.key].u.length?unitPage(ub,+um[2]):home()}
+ const tm=h.match(/^t-([a-z0-9]+?)(?:-u([1-4]))?$/i);if(tm){const tb=book(tm[1]);return tb?(tm[2]?tests(tb,+tm[2]):hub(tb)):home()}
  const m=h.match(/^([a-z0-9]+?)(?:-(.+))?$/i);
  const b=m&&book(m[1]);
  if(!b)return home();
