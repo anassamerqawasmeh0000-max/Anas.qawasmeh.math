@@ -16,6 +16,15 @@ header{background:linear-gradient(90deg,#0b2447,#19376d);border-bottom:3px solid
 main{max-width:960px;margin:0 auto;padding:18px max(16px,env(safe-area-inset-right)) 50px max(16px,env(safe-area-inset-left))}
 h1{font-family:'Reem Kufi',Cairo,sans-serif;font-size:28px;margin:6px 0 4px;text-wrap:balance}
 .sub{color:var(--mut);margin:0 0 16px}
+.bk{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px}
+.bk>.bc:last-child:nth-child(odd){grid-column:1/-1;width:calc(50% - 7px);justify-self:center}
+.bc{display:flex;flex-direction:column;align-items:center;gap:8px;background:var(--card);border:1px solid var(--line);border-bottom:5px solid var(--c);border-radius:16px;padding:12px;text-align:center}
+.bc:active,.bc:hover{border-color:var(--c)}
+.bc .im{position:relative;width:100%;aspect-ratio:3/4;border-radius:10px;overflow:hidden;background:linear-gradient(160deg,var(--c),#16254a);display:grid;place-items:center;box-shadow:0 6px 16px #0006}
+.bc .im img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.bc .im em{font-style:normal;font:700 64px 'Reem Kufi',Cairo;color:#0a1630;opacity:.85}
+.bc .im u{position:absolute;bottom:6px;left:6px;text-decoration:none;font-size:26px;background:#0a1630cc;border-radius:10px;padding:2px 8px}
+.bc b{font-family:'Reem Kufi',Cairo;font-size:18px;color:var(--fg)}.bc small{color:var(--mut);font-size:13px}
 .books{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
 .book{background:var(--card);border:1px solid var(--line);border-top:4px solid var(--gold2);border-radius:14px;padding:16px;display:block}
 .book:active,.book:hover{border-color:var(--gold)}
@@ -139,15 +148,18 @@ const GRADE={f3:['أول ثانوي','الرياضيات'],s3:['ثاني ثان�
 function home(){
  document.title='منصة الرائد في الرياضيات';
  let s='<div class="hero"><div class="tx"><small>الأستاذ</small><h1>أنس القواسمة</h1><p>منصة الرائد في الرياضيات</p></div><div class="ph"><img src="assets/anas.webp" alt="الأستاذ أنس القواسمة"></div></div>'
- +'<h2 class="gh">اختر صفّك</h2><p class="sub">ادخل على صفّك لتجد وحداته، وفي كل وحدة الفيديوهات والاختبارات.</p><div class="books">';
- DATA.forEach(b=>{const I=ICON[b.key]||['','#fff'],G=GRADE[b.key]||[b.title,''];s+='<a class="ex" style="--c:'+I[1]+'" href="#h-'+b.key+'"><i>'+I[0]+'</i><div><b>'+esc(G[0])+'</b><span>'+esc(G[1])+' — '+AR(UNITS[b.key].u.length)+' وحدات</span></div></a>'});
+ +'<h2 class="gh">📚 كتبي</h2><p class="sub">اختر كتابك لتدخل على وحداته.</p><div class="bk">';
+ const card=(b,href,tst)=>{const I=ICON[b.key]||['','#fff'],G=GRADE[b.key];return '<a class="bc" style="--c:'+I[1]+'" href="'+href+'"><div class="im"><em>'+I[0]+'</em><img src="assets/book-'+b.key+'.jpg" alt="" onerror="this.remove()">'+(tst?'<u>📝</u>':'')+'</div><b>'+(tst?'اختبارات ':'')+esc(G[0])+'</b><small>'+esc(G[1])+'</small></a>'};
+ DATA.forEach(b=>{s+=card(b,'#h-'+b.key,0)});
+ s+='</div><h2 class="gh">📝 الاختبارات</h2><p class="sub">اختبارات كل كتاب على حدة.</p><div class="bk">';
+ DATA.forEach(b=>{s+=card(b,'#t-'+b.key,1)});
  app.innerHTML=s+'</div>';
 }
-function hub(b){
+function hub(b,T){
  const G=GRADE[b.key],U=UNITS[b.key];document.title=G[0]+' — '+G[1];
- app.innerHTML='<div class="crumb"><a href="#">الرئيسية</a> ‹ '+esc(G[0])+'</div><h1>'+esc(G[0])+' — '+esc(G[1])+'</h1><p class="sub">اختر الوحدة:</p><div class="books" id="ul"></div>';
+ app.innerHTML='<div class="crumb"><a href="#">الرئيسية</a> ‹ '+esc(G[0])+'</div><h1>'+(T?'اختبارات ':'')+esc(G[0])+' — '+esc(G[1])+'</h1><p class="sub">اختر الوحدة:</p><div class="books" id="ul"></div>';
  const I=ICON[b.key]||['','#fff'];
- document.getElementById('ul').innerHTML=U.u.map((u,i)=>'<a class="ex" style="--c:'+I[1]+'" href="#hu-'+b.key+'-'+(i+1)+'"><i>'+(i+1)+'</i><div><b>'+esc(u[0])+'</b><span>'+esc(u[1]||'فيديوهات واختبارات')+'</span></div></a>').join('');
+ document.getElementById('ul').innerHTML=U.u.map((u,i)=>'<a class="ex" style="--c:'+I[1]+'" href="#'+(T?'t-'+b.key+'-u':'hu-'+b.key+'-')+(i+1)+'"><i>'+(i+1)+'</i><div><b>'+esc(u[0])+'</b><span>'+esc(T?'اختبارات تفاعلية وملفات PDF':(u[1]||'فيديوهات واختبارات'))+'</span></div></a>').join('');
 }
 function unitPage(b,n){
  const G=GRADE[b.key],U=UNITS[b.key],u=U.u[n-1];document.title=u[0]+' — '+G[0];
@@ -280,7 +292,7 @@ function render(){
  clearInterval(TM);
  const hm=h.match(/^h-([a-z0-9]+)$/i);if(hm){const hb=book(hm[1]);return hb?hub(hb):home()}
  const um=h.match(/^hu-([a-z0-9]+)-([1-4])$/i);if(um){const ub=book(um[1]);return ub&&+um[2]<=UNITS[ub.key].u.length?unitPage(ub,+um[2]):home()}
- const tm=h.match(/^t-([a-z0-9]+?)(?:-u([1-4]))?$/i);if(tm){const tb=book(tm[1]);return tb?(tm[2]?tests(tb,+tm[2]):hub(tb)):home()}
+ const tm=h.match(/^t-([a-z0-9]+?)(?:-u([1-4]))?$/i);if(tm){const tb=book(tm[1]);return tb?(tm[2]?tests(tb,+tm[2]):hub(tb,1)):home()}
  const m=h.match(/^([a-z0-9]+?)(?:-(.+))?$/i);
  const b=m&&book(m[1]);
  if(!b)return home();
