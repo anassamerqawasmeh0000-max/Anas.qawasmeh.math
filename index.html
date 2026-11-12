@@ -104,7 +104,7 @@ footer{text-align:center;color:var(--mut);font-size:14px;padding:20px 16px 40px}
 .modal{position:fixed;inset:0;background:rgba(3,8,20,.75);display:grid;place-items:center;z-index:50;padding:20px}
 .modal>div{background:var(--card);border:1px solid var(--gold2);border-radius:16px;padding:20px;max-width:420px;width:100%}
 .qlist{display:grid;gap:10px}
-.qc{display:block;background:var(--card);border:1px solid var(--line);border-right:6px solid var(--gold2);border-radius:14px;padding:14px 16px}
+.qg{background:var(--card);border:1px solid var(--line);border-radius:14px;margin:10px 0;padding:4px 14px 12px}.qg>summary{cursor:pointer;font-family:'Reem Kufi',Cairo;font-size:19px;color:var(--gold);padding:10px 0}.qg small{color:var(--mut);font-size:13px}.lv{margin:12px 0 6px;font-weight:700;color:var(--fg)}.qc{display:block;background:var(--card);border:1px solid var(--line);border-right:6px solid var(--gold2);border-radius:14px;padding:14px 16px}
 .qc b{font-family:'Reem Kufi',Cairo;font-size:19px;color:var(--gold)}.qc span{display:block;color:var(--mut);font-size:14px}
 .sh{font-family:'Reem Kufi',Cairo;color:var(--gold);font-size:20px;margin:20px 0 8px}
 .wa{display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap}
@@ -151,7 +151,7 @@ function units(b){
 function tests(b,u){
  u=u||1;document.title='اختبارات الوحدة '+UN[u-1]+' — '+b.title;
  app.innerHTML='<div class="crumb"><a href="#">الرئيسية</a> ‹ <a href="#t-'+b.key+'">اختبارات '+esc(b.title)+'</a> ‹ الوحدة '+UN[u-1]+'</div><h1>الوحدة '+UN[u-1]+' — اختبارات</h1><p class="sub">'+esc(b.title)+'. اضغط على الاختبار ليفتح، ومنه تقدر تحمّله أو تطبعه.</p><div id="ql"></div><div class="sh">📄 اختبارات PDF للطباعة</div><div id="tl" class="list"><div class="empty">جاري التحميل…</div></div>';
- if(b.key==='f3')quizList().then(L=>{L=L.filter(x=>(x.unit||1)===u);if(L.length)document.getElementById('ql').innerHTML='<div class="sh">📝 اختبارات تفاعلية (تصحيح فوري مع الحل)</div><div class="qlist">'+L.map(x=>{const s=LS.get('qz-'+x.id);return '<a class="qc" href="#qz-'+x.id+'"><b>'+esc(x.title)+'</b><span>'+AR(x.count)+' سؤال — '+esc(x.time)+(s&&s.done?' — آخر نتيجة: '+AR(s.score)+'/'+AR(x.total):s&&s.start?' — متابعة':'')+'</span></a>'}).join('')+'</div>'});
+ if(b.key==='f3')quizList().then(L=>{L=L.filter(x=>(x.unit||1)===u);if(!L.length)return;const card=x=>{const s=LS.get('qz-'+x.id);return '<a class="qc" href="#qz-'+x.id+'"><b>'+esc(x.title)+'</b><span>'+AR(x.count)+' سؤال — '+esc(x.time)+(s&&s.done?' — آخر نتيجة: '+AR(s.score)+'/'+AR(x.total):s&&s.start?' — متابعة':'')+'</span></a>'};const LN={1:'الدرس الأول: قياس الزاوية بالراديان',2:'الدرس الثاني: النسب المثلثية',3:'الدرس الثالث: اقترانا الجيب وجيب التمام'},LV=[['E','🟢 سهل'],['M','🟡 متوسط'],['H','🔴 صعب'],['X','⭐ اختبار شامل']];let h='<div class="sh">📝 اختبارات تفاعلية (تصحيح فوري مع شرح مفصل لكل سؤال)</div>';if(L.some(x=>x.lesson)){[1,2,3].forEach(n=>{const A=L.filter(x=>x.lesson===n);if(!A.length)return;h+='<details class="qg"><summary>'+LN[n]+' <small>('+AR(A.length)+' اختبارات)</small></summary>';LV.forEach(v=>{const B=A.filter(x=>x.level===v[0]);if(B.length)h+='<div class="lv">'+v[1]+'</div><div class="qlist">'+B.map(card).join('')+'</div>'});h+='</details>'});const R=L.filter(x=>!x.lesson);if(R.length)h+='<div class="qlist">'+R.map(card).join('')+'</div>'}else h+='<div class="qlist">'+L.map(card).join('')+'</div>';document.getElementById('ql').innerHTML=h});
  const box=document.getElementById('tl');const dir=b.key+'/u'+u;
  const show=fs=>{fs=fs.filter(f=>/\.(pdf|png|jpe?g|html?|docx?)$/i.test(f)).sort((x,y)=>x.localeCompare(y,'ar',{numeric:true}));
   box.innerHTML=fs.length?fs.map(f=>{const n=f.replace(/\.[^.]+$/,'').replace(/_/g,' ');const e=(f.split('.').pop()||'').toUpperCase();
@@ -265,7 +265,7 @@ function qresult(f){
 function render(){
  const h=decodeURIComponent(location.hash.replace('#',''));
  if(!h)return home();
- const qm=h.match(/^qz-([A-Z])$/);if(qm){return qstart(qm[1])}
+ const qm=h.match(/^qz-([A-Za-z0-9-]+)$/);if(qm){return qstart(qm[1])}
  clearInterval(TM);
  const tm=h.match(/^t-([a-z0-9]+?)(?:-u([123]))?$/i);if(tm){const tb=book(tm[1]);return tb?(tm[2]?tests(tb,+tm[2]):units(tb)):home()}
  const m=h.match(/^([a-z0-9]+?)(?:-(.+))?$/i);
