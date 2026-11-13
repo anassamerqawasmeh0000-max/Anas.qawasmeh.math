@@ -1,0 +1,34 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{db}/documents {
+    function signed() { return request.auth != null; }
+    function admin() { return signed() && request.auth.token.email == 'anassamerqawasmeh0000@gmail.com' && request.auth.token.email_verified == true; }
+    function approved() { return signed() && get(/databases/$(db)/documents/users/$(request.auth.uid)).data.status == 'approved'; }
+
+    match /users/{uid} {
+      allow read: if admin() || (signed() && request.auth.uid == uid);
+      allow create: if signed() && request.auth.uid == uid
+        && request.resource.data.status == 'pending'
+        && request.resource.data.keys().hasOnly(['name','phone','email','status','createdAt','lastSeen']);
+      allow update: if admin() || (signed() && request.auth.uid == uid
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['lastSeen']));
+      allow delete: if admin();
+      match /kv/{k} {
+        allow read, write: if admin() || (signed() && request.auth.uid == uid && approved());
+      }
+    }
+    match /qz/{d} {
+      allow read: if admin() || approved();
+      allow write: if admin();
+    }
+    match /att/{d} {
+      allow create: if approved() && request.resource.data.uid == request.auth.uid;
+      allow read: if admin() || (signed() && resource.data.uid == request.auth.uid);
+      allow delete: if admin();
+    }
+    match /vw/{d} {
+      allow create: if approved() && request.resource.data.uid == request.auth.uid;
+      allow read, delete: if admin();
+    }
+  }
+}
