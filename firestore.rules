@@ -5,6 +5,12 @@ service cloud.firestore {
     function admin() { return signed() && request.auth.token.email == 'anassamerqawasmeh0000@gmail.com' && request.auth.token.email_verified == true; }
     function approved() { return signed() && get(/databases/$(db)/documents/users/$(request.auth.uid)).data.status == 'approved'; }
 
+    function open() { return get(/databases/$(db)/documents/cfg/open).data.open == true; }
+
+    match /cfg/{d} {
+      allow read: if true;
+      allow write: if admin();
+    }
     match /users/{uid} {
       allow read: if admin() || (signed() && request.auth.uid == uid);
       allow create: if signed() && request.auth.uid == uid
@@ -18,7 +24,7 @@ service cloud.firestore {
       }
     }
     match /qz/{d} {
-      allow read: if admin() || approved();
+      allow read: if admin() || approved() || open();
       allow write: if admin();
     }
     match /att/{d} {

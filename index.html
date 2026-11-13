@@ -241,7 +241,7 @@ function player(b,v){
 /* ===== الاختبارات التفاعلية ===== */
 const QS={};let QI=null;
 let UP='';const SYNC={hist:1,wrong:1};
-const LS={get(k){try{return JSON.parse(localStorage.getItem(UP+k))}catch(e){return null}},set(k,v){try{localStorage.setItem(UP+k,JSON.stringify(v))}catch(e){}if(SYNC[k]&&window.FB&&FBS&&FBS.stage==='ok')FB.kvSet(k,JSON.stringify(v))},del(k){try{localStorage.removeItem(UP+k)}catch(e){}}};
+const LS={get(k){try{return JSON.parse(localStorage.getItem(UP+k))}catch(e){return null}},set(k,v){try{localStorage.setItem(UP+k,JSON.stringify(v))}catch(e){}if(SYNC[k]&&window.FB&&FBS&&FBS.stage==='ok'&&FBS.user)FB.kvSet(k,JSON.stringify(v))},del(k){try{localStorage.removeItem(UP+k)}catch(e){}}};
 let Q=null,ST=null,TM=null;
 function loadQuiz(id){return QS[id]?Promise.resolve(QS[id]):FB.blob(id).then(t=>t?JSON.parse(t):fetch('quiz/'+id+'.json').then(r=>{if(!r.ok)throw 0;return r.json()})).then(j=>QS[id]=j)}
 function quizList(){return QI?Promise.resolve(QI):FB.blob('index').then(t=>t?JSON.parse(t):fetch('quiz/index.json').then(r=>r.ok?r.json():[])).catch(()=>[]).then(j=>QI=j)}
@@ -397,6 +397,7 @@ function render(){
  if(!FBS||FBS.stage!=='ok')return gate(FBS);
  const h=decodeURIComponent(location.hash.replace('#',''));
  if(!h)return home();
+ if(h==='login'){if(FBS.user){location.hash='';return}return authForm()}
  if(h==='admin'){clearInterval(TM);return FBS.admin?adminPage():home()}
  const qm=h.match(/^qz-([A-Za-z0-9-]+)$/);if(qm){return qstart(qm[1])}
  if(h==='me'){clearInterval(TM);return mePage()}
@@ -423,6 +424,7 @@ const errT=e=>ERRS[e&&e.code]||'صار خطأ، حاول مرة ثانية';
 const ago=t=>{if(!t)return 'ما دخل';const m=Math.round((Date.now()-t)/60000);return m<3?'متصل الآن':m<60?'قبل '+AR(m)+' دقيقة':m<1440?'قبل '+AR(Math.round(m/60))+' ساعة':'قبل '+AR(Math.round(m/1440))+' يوم'};
 const fdt=t=>new Date(t).toLocaleString('ar-JO',{dateStyle:'short',timeStyle:'short'});
 function ubar(){const b=document.getElementById('ub');if(!b)return;const s=FBS;
+ if(s&&s.stage==='ok'&&!s.user){b.innerHTML='<a href="#login">🔐 تسجيل دخول</a>';return}
  if(!s||!s.user||s.stage==='loading'||s.stage==='out'){b.innerHTML='';return}
  b.innerHTML=(s.prof?'<span>👤 '+esc(s.prof.name)+'</span>':'')+(s.admin&&s.stage==='ok'?'<a href="#admin">🛠 المراقبة</a>':'')+'<a href="#" id="lo">خروج</a>';
  document.getElementById('lo').onclick=e=>{e.preventDefault();FB.logout()}}
@@ -459,8 +461,8 @@ async function syncDown(){
   else m=Object.assign({},r||{},l||{});
   localStorage.setItem(UP+k,JSON.stringify(m))}catch(e){}}}
 function bootApp(){
- const start=()=>FB.onState(s=>{const prev=FBS;FBS=s;UP=s.user&&s.stage==='ok'?'u'+s.user.uid.slice(0,12)+':':'';ubar();
-  if(s.stage==='ok'){if(!prev||prev.stage!=='ok'||prev.user.uid!==s.user.uid)syncDown().then(render)}
+ const start=()=>FB.onState(s=>{const prev=FBS;FBS=s;UP=s.stage==='ok'?(s.user?'u'+s.user.uid.slice(0,12)+':':'g:'):'';ubar();
+  if(s.stage==='ok'){if(!prev||prev.stage!=='ok'||(prev.user&&prev.user.uid)!==(s.user&&s.user.uid))(s.user?syncDown():Promise.resolve()).then(render)}
   else{if(prev&&prev.stage==='ok'){for(const k in QS)delete QS[k];QI=null;FX=null}gate(s)}});
  if(window.FB)start();else{gate({stage:'loading'});window.addEventListener('fbready',start,{once:true});setTimeout(()=>{if(!window.FB)gate({stage:'error',err:{}})},15000)}}
 /* ----- لوحة المراقبة ----- */
@@ -469,9 +471,10 @@ const getAtt=async f=>{if(!ATC||f)ATC=await FB.atts(500);return ATC};
 function adminPage(t){
  AT=t||AT;document.title='لوحة المراقبة';
  const tabs=[['st','👥 الطلاب'],['rs','📝 النتائج'],['hd','🎯 أصعب الأسئلة'],['vd','🎬 الفيديوهات'],['up','☁️ المحتوى']];
- app.innerHTML='<div class="crumb"><a href="#">الرئيسية</a> ‹ المراقبة</div><h1>🛠 لوحة المراقبة</h1><div class="chips">'+tabs.map(x=>'<button class="chip'+(AT===x[0]?' on':'')+'" data-t="'+x[0]+'">'+x[1]+'</button>').join('')+'<button class="chip" id="rf">🔄 تحديث</button></div><div id="ad"><div class="empty">جاري التحميل…</div></div>';
+ app.innerHTML='<div class="crumb"><a href="#">الرئيسية</a> ‹ المراقبة</div><h1>🛠 لوحة المراقبة</h1><div id="opw"></div><div class="chips">'+tabs.map(x=>'<button class="chip'+(AT===x[0]?' on':'')+'" data-t="'+x[0]+'">'+x[1]+'</button>').join('')+'<button class="chip" id="rf">🔄 تحديث</button></div><div id="ad"><div class="empty">جاري التحميل…</div></div>';
  app.querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>adminPage(b.dataset.t));
  document.getElementById('rf').onclick=()=>{ATC=null;adminPage()};
+ FB.getOpen().then(o=>{const w=document.getElementById('opw');if(!w)return;w.innerHTML='<div class="ur"><div><b>'+(o?'🔓 المنصة مفتوحة للجميع':'🔒 المنصة بحساب وموافقة')+'</b><small>'+(o?'أي حدا يفتح الأسئلة بدون تسجيل':'لازم الطالب يسجّل وأنت توافق عليه')+'</small></div><button class="btn gold" id="opb">'+(o?'قفل (بحساب فقط)':'فتح للجميع')+'</button></div>';document.getElementById('opb').onclick=()=>FB.setOpen(!o).then(()=>{toast('تم');adminPage()}).catch(e=>toast(errT(e)))});
  const ad=document.getElementById('ad');
  ({st:adStudents,rs:adResults,hd:adHard,vd:adViews,up:adUpload})[AT](ad).catch(e=>{ad.innerHTML='<div class="empty">'+esc(errT(e))+'</div>'})}
 async function adStudents(ad){

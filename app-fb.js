@@ -22,18 +22,21 @@ function ping(u){
   const go=()=>{if(document.visibilityState==='visible')updateDoc(doc(db,'users',u.uid),{lastSeen:Date.now()}).catch(()=>{})};
   go();pingT=setInterval(go,120000);
 }
-function handle(u){
+let OPEN=false;
+const getOpen=async()=>{try{const d=await getDoc(doc(db,'cfg','open'));OPEN=d.exists()&&d.data().open===true}catch(e){OPEN=false}return OPEN};
+async function handle(u){
   if(unsubProf){unsubProf();unsubProf=null}
   clearInterval(pingT);
-  if(!u){state={stage:'out'};emit();return}
+  if(!u){await getOpen();state=OPEN?{stage:'ok',user:null,prof:null,admin:false,open:true}:{stage:'out'};emit();return}
+  await getOpen();
   const admin=(u.email||'').toLowerCase()===ADMIN;
   if(admin&&!u.emailVerified){state={stage:'verify',user:u,admin:true};emit();return}
   unsubProf=onSnapshot(doc(db,'users',u.uid),snap=>{
     if(!snap.exists()){mkProfile(u);return}
     const p=snap.data();
-    const st=admin?'ok':(p.status==='approved'?'ok':p.status==='blocked'?'blocked':'pending');
+    const st=admin?'ok':(p.status==='approved'?'ok':p.status==='blocked'?'blocked':(OPEN?'ok':'pending'));
     const was=state.stage;
-    state={stage:st,user:u,prof:p,admin};
+    state={stage:st,user:u,prof:p,admin,open:OPEN};
     if(was!==st||was==='loading')emit();else emit();
     if(!pingT)ping(u);
   },err=>{state={stage:'error',err,user:u};emit()});
@@ -88,6 +91,7 @@ window.FB={
   reset:e=>sendPasswordResetEmail(auth,e),
   resend:()=>sendEmailVerification(auth.currentUser),
   async recheck(){const u=auth.currentUser;if(!u)return;await u.reload();await u.getIdToken(true);handle(auth.currentUser)},
+  getOpen,setOpen:async v=>{await setDoc(doc(db,'cfg','open'),{open:!!v});OPEN=!!v},
   blob,putBlob,kvGet,kvSet,logAttempt,logView,
   users:async()=>(await getDocs(collection(db,'users'))).docs.map(d=>Object.assign({uid:d.id},d.data())),
   setStatus:(uid,s)=>updateDoc(doc(db,'users',uid),{status:s}),
