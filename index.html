@@ -255,8 +255,8 @@ const QS={};let QI=null;
 let UP='';const SYNC={hist:1,wrong:1};
 const LS={get(k){try{return JSON.parse(localStorage.getItem(UP+k))}catch(e){return null}},set(k,v){try{localStorage.setItem(UP+k,JSON.stringify(v))}catch(e){}if(SYNC[k]&&window.FB&&FBS&&FBS.stage==='ok'&&FBS.user)FB.kvSet(k,JSON.stringify(v))},del(k){try{localStorage.removeItem(UP+k)}catch(e){}}};
 let Q=null,ST=null,TM=null;
-function loadQuiz(id){return QS[id]?Promise.resolve(QS[id]):FB.blob(id).catch(()=>null).then(t=>t?JSON.parse(t):fetch('quiz/'+id+'.json').then(r=>{if(!r.ok)throw 0;return r.json()})).then(j=>QS[id]=j)}
-function quizList(){return QI?Promise.resolve(QI):FB.blob('index').catch(()=>null).then(t=>t?JSON.parse(t):fetch('quiz/index.json').then(r=>r.ok?r.json():[])).catch(()=>[]).then(j=>fetch('quiz/g9.json').then(r=>r.ok?r.json():[]).catch(()=>[]).then(x=>{const ids={};j.forEach(q=>ids[q.id]=1);return j.concat(x.filter(q=>!ids[q.id]))})).then(j=>QI=j)}
+function loadQuiz(id){return QS[id]?Promise.resolve(QS[id]):FB.blob(id).catch(()=>null).then(t=>t?JSON.parse(t):fetch('quiz/'+id+'.json?v=2').then(r=>{if(!r.ok)throw 0;return r.json()})).then(j=>QS[id]=j)}
+function quizList(){return QI?Promise.resolve(QI):FB.blob('index').catch(()=>null).then(t=>t?JSON.parse(t):fetch('quiz/index.json').then(r=>r.ok?r.json():[])).catch(()=>[]).then(j=>fetch('quiz/g9.json?v=2').then(r=>r.ok?r.json():[]).catch(()=>[]).then(x=>{const ids={};j.forEach(q=>ids[q.id]=1);return j.concat(x.filter(q=>!ids[q.id]))})).then(j=>QI=j)}
 function qstart(id){
  if(id==='custom'){const c=LS.get('cq');if(!c){location.hash='mk';return}Q=c;ST=LS.get('qz-custom')||null;return qintro()}
  app.innerHTML='<div class="empty">جاري التحميل…</div>';
