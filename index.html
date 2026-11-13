@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="ar" dir="rtl"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#0b2447"><link rel="apple-touch-icon" href="assets/icon-192.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="الرائد">
 <meta name="robots" content="noindex,nofollow">
 <title>منصة الرائد في الرياضيات — فيديوهات الشرح</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Reem+Kufi:wght@600;700&family=Cairo:wght@400;600;700&display=swap">
@@ -523,5 +524,15 @@ async function adUpload(ad){
    await FB.putBlob('index',JSON.stringify(ix));
    await FB.putBlob('fx',await (await fetch('fx.json')).text());
    lg('✅ خلصت');toast('تم رفع الأسئلة')}catch(e){lg('❌ '+(e&&e.message||e));this.disabled=false}}}
+/* ===== تثبيت المنصة كتطبيق ===== */
+(function(){let dp=null;const standalone=()=>matchMedia('(display-mode: standalone)').matches||navigator.standalone;
+ const seen=()=>{try{return localStorage.getItem('pwa-seen')}catch(e){return 1}},mark=()=>{try{localStorage.setItem('pwa-seen','1')}catch(e){}};
+ function bar(ios){if(standalone()||seen()||document.getElementById('pwab'))return;const d=document.createElement('div');d.id='pwab';
+  d.style.cssText='position:fixed;bottom:0;left:0;right:0;z-index:60;background:#14294f;border-top:2px solid var(--gold2);padding:12px max(16px,env(safe-area-inset-right)) calc(12px + env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left));display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap';
+  d.innerHTML='<span style="flex:1;min-width:200px">📲 ثبّت المنصة على جوالك '+(ios?'— اضغط زر المشاركة ثم «إضافة إلى الشاشة الرئيسية»':'ك تطبيق')+'</span>'+(ios?'':'<button class="btn gold" id="pwai">تثبيت</button>')+'<button class="btn" id="pwax">لاحقاً</button>';
+  document.body.appendChild(d);document.getElementById('pwax').onclick=()=>{mark();d.remove()};
+  const i=document.getElementById('pwai');if(i)i.onclick=()=>{if(dp){dp.prompt();dp.userChoice.finally(()=>{mark();d.remove()})}else{d.remove()}}}
+ addEventListener('beforeinstallprompt',e=>{e.preventDefault();dp=e;setTimeout(()=>bar(false),4000)});
+ if(/iphone|ipad|ipod/i.test(navigator.userAgent)&&!standalone())setTimeout(()=>bar(true),5000)})();
 window.addEventListener('hashchange',render);bootApp();
 </script></body></html>
