@@ -95,6 +95,7 @@ footer{text-align:center;color:var(--mut);font-size:14px;padding:20px 16px 40px}
 .ur small{display:block;color:var(--mut)}.ua{display:flex;gap:6px;flex-wrap:wrap}.ua .btn{padding:5px 10px;font-size:14px}
 .pill.g{border-color:#2fbf80;color:#7ee2b0}.pill.r{border-color:#e5584f;color:#ff9a93}.pill.y{border-color:var(--gold2);color:var(--gold)}
 .ulog{background:#0d1d3c;border:1px solid var(--line);border-radius:10px;padding:10px;max-height:240px;overflow:auto;font-size:13px;direction:ltr;white-space:pre-wrap}
+.gch{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:6px}.gch small{color:var(--muted)}.gc{border:1px solid #345;border-radius:20px;padding:3px 10px;font-size:13px;cursor:pointer;opacity:.55}.gc.on{opacity:1;border-color:var(--gold);color:var(--gold)}.gc input{display:none}
 .soon{position:absolute;top:8px;left:8px;background:rgba(0,0,0,.65);color:#fff;font-size:11px;padding:2px 8px;border-radius:99px;text-decoration:none}
 </style>
 <link rel="stylesheet" href="katex/katex.min.css">
@@ -163,6 +164,10 @@ const app=document.getElementById('app');
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const AR=n=>String(n).replace(/\d/g,d=>'٠١٢٣٤٥٦٧٨٩'[d]);
 const book=k=>DATA.find(b=>b.key===k);
+const gAllowed=k=>{const s=FBS;if(!s||s.admin||!s.prof||!Array.isArray(s.prof.grades)||!s.prof.grades.length)return true;return s.prof.grades.includes(k)};
+const DATAV=()=>DATA.filter(b=>gAllowed(b.key));
+function blockedHash(h){let m=h.match(/^qz-([A-Za-z0-9-]+)$/);if(m)return !gAllowed(qbk(m[1]));m=h.match(/^(?:hu|h|t)-([a-z0-9]+)/i)||h.match(/^([a-z0-9]+?)(?:-.+)?$/i);const b=m&&book(m[1]);return !!(b&&!gAllowed(b.key))}
+function denied(){clearInterval(TM);document.title='غير مفعّل';app.innerHTML='<div class="empty" style="padding:40px 10px"><h2>🔒 هذا الصف غير مفعّل لحسابك</h2><p>حسابك مفعّل للصفوف اللي حددها الأستاذ أنس فقط.<br>للاستفسار تواصل معه: <b dir="ltr">0781507070</b></p><a class="btn gold" href="#">الرئيسية</a></div>'}
 function item(b,v,cur){return '<a class="vi'+(v.id===cur?' on':'')+'" href="#'+b.key+'-'+v.id+'"><span class="id">'+v.id+'</span><span class="t">'+esc(v.t)+'</span>'+(v.k==='ext'?'<span class="tag">مثال إضافي</span>':'')+'</a>'}
 const ICON={g1:['١','#ff7a7a'],g2:['٢','#ffa45c'],g3:['٣','#ffd24d'],g4:['٤','#a6e05a'],g5:['٥','#4fd18b'],g6:['٦','#3fd0c9'],g7:['٧','#4aa3ff'],g8:['٨','#8a8cff'],g9:['٩','#c07cff'],g10:['١٠','#ff7cc3'],f3:['١','#4aa3ff'],s3:['٢','#f6d77a'],b2:['٪','#5fd6a3']};
 const UNITS={
@@ -187,9 +192,9 @@ function home(){
  +'<form class="gsearch" id="hs"><input type="search" id="hq" placeholder="🔍 ابحث عن فيديو أو اختبار…"><button class="btn gold">بحث</button></form><div class="tools"><a href="#me"><span>📈</span>تقدّمي<small>نتائجي</small></a><a href="#wrong"><span>📕</span>دفتر أخطائي<small>راجع أخطاءك</small></a><a href="#mk"><span>🎲</span>اختبار مخصص<small>اختر وابدأ</small></a><a href="#fx"><span>📐</span>قوانين<small>مراجعة سريعة</small></a></div>'
  +'<h2 class="gh">📚 كتبي</h2><p class="sub">اختر كتابك لتدخل على وحداته.</p><div class="bk">';
  const card=(b,href,tst)=>{const I=ICON[b.key]||['','#fff'],G=GRADE[b.key];return '<a class="bc" style="--c:'+I[1]+'" href="'+href+'"><div class="im"><div class="bkart"><i>'+esc(G[0])+'</i><h4>'+esc(G[1])+'</h4><em>'+I[0]+'</em></div><img src="assets/book-'+b.key+'.jpg" alt="" onerror="this.remove()">'+(tst?'<u>📝</u>':'')+(b.videos.length?'':'<s class="soon">قريباً</s>')+'</div><b>'+(tst?'اختبارات ':'')+esc(G[0])+'</b><small>'+esc(G[1])+'</small></a>'};
- DATA.forEach(b=>{s+=card(b,'#h-'+b.key,0)});
+ DATAV().forEach(b=>{s+=card(b,'#h-'+b.key,0)});
  s+='</div><h2 class="gh">📝 الاختبارات</h2><p class="sub">اختبارات كل كتاب على حدة.</p><div class="bk">';
- DATA.forEach(b=>{s+=card(b,'#t-'+b.key,1)});
+ DATAV().forEach(b=>{s+=card(b,'#t-'+b.key,1)});
  app.innerHTML=s+'</div>';
  document.getElementById('hs').onsubmit=e=>{e.preventDefault();location.hash='s-'+encodeURIComponent(document.getElementById('hq').value)};
 }
@@ -256,7 +261,7 @@ let UP='';const SYNC={hist:1,wrong:1};
 const LS={get(k){try{return JSON.parse(localStorage.getItem(UP+k))}catch(e){return null}},set(k,v){try{localStorage.setItem(UP+k,JSON.stringify(v))}catch(e){}if(SYNC[k]&&window.FB&&FBS&&FBS.stage==='ok'&&FBS.user)FB.kvSet(k,JSON.stringify(v))},del(k){try{localStorage.removeItem(UP+k)}catch(e){}}};
 let Q=null,ST=null,TM=null;
 function loadQuiz(id){return QS[id]?Promise.resolve(QS[id]):FB.blob(id).catch(()=>null).then(t=>t?JSON.parse(t):fetch('quiz/'+id+'.json?v=2').then(r=>{if(!r.ok)throw 0;return r.json()})).then(j=>QS[id]=j)}
-function quizList(){return QI?Promise.resolve(QI):FB.blob('index').catch(()=>null).then(t=>t?JSON.parse(t):fetch('quiz/index.json').then(r=>r.ok?r.json():[])).catch(()=>[]).then(j=>fetch('quiz/g9.json?v=2').then(r=>r.ok?r.json():[]).catch(()=>[]).then(x=>{const ids={};j.forEach(q=>ids[q.id]=1);return j.concat(x.filter(q=>!ids[q.id]))})).then(j=>QI=j)}
+function quizList(){return QI?Promise.resolve(QI):FB.blob('index').catch(()=>null).then(t=>t?JSON.parse(t):fetch('quiz/index.json').then(r=>r.ok?r.json():[])).catch(()=>[]).then(j=>fetch('quiz/g9.json?v=2').then(r=>r.ok?r.json():[]).catch(()=>[]).then(x=>{const ids={};j.forEach(q=>ids[q.id]=1);return j.concat(x.filter(q=>!ids[q.id]))})).then(j=>QI=j.filter(q=>gAllowed(qbk(q.id))))}
 function qstart(id){
  if(id==='custom'){const c=LS.get('cq');if(!c){location.hash='mk';return}Q=c;ST=LS.get('qz-custom')||null;return qintro()}
  app.innerHTML='<div class="empty">جاري التحميل…</div>';
@@ -400,7 +405,7 @@ function searchPage(q){
  document.getElementById('gf').onsubmit=e=>{e.preventDefault();location.hash='s-'+encodeURIComponent(document.getElementById('gq').value)};
  if(!ql)return;
  const box=document.getElementById('gr2');let o='';
- DATA.forEach(b=>{const vs=b.videos.filter(v=>v.id.toLowerCase().includes(ql)||v.t.toLowerCase().includes(ql)).slice(0,30);if(vs.length)o+='<div class="lh"><span>🎬 '+esc(GRADE[b.key][0])+'</span><small>'+AR(vs.length)+'</small></div><div class="list">'+vs.map(v=>item(b,v)).join('')+'</div>'});
+ DATAV().forEach(b=>{const vs=b.videos.filter(v=>v.id.toLowerCase().includes(ql)||v.t.toLowerCase().includes(ql)).slice(0,30);if(vs.length)o+='<div class="lh"><span>🎬 '+esc(GRADE[b.key][0])+'</span><small>'+AR(vs.length)+'</small></div><div class="list">'+vs.map(v=>item(b,v)).join('')+'</div>'});
  quizList().then(L=>{const ts=L.filter(x=>x.title.toLowerCase().includes(ql));if(ts.length)o+='<div class="lh"><span>📝 اختبارات</span><small>'+AR(ts.length)+'</small></div>'+ts.map(x=>'<a class="qc" href="#qz-'+x.id+'"><b>'+esc(x.title)+'</b><span>'+AR(x.count)+' سؤال</span></a>').join('');
   box.innerHTML=o||'<div class="empty">ما في نتائج</div>'});
 }
@@ -409,6 +414,7 @@ function render(){
  if(!FBS||FBS.stage!=='ok')return gate(FBS);
  const h=decodeURIComponent(location.hash.replace('#',''));
  if(!h)return home();
+ if(blockedHash(h))return denied();
  if(h==='login'){if(FBS.user){location.hash='';return}return authForm()}
  if(h==='admin'){clearInterval(TM);return FBS.admin?adminPage():home()}
  const qm=h.match(/^qz-([A-Za-z0-9-]+)$/);if(qm){return qstart(qm[1])}
@@ -497,10 +503,13 @@ async function adStudents(ad){
  const on=U.filter(u=>Date.now()-(u.lastSeen||0)<3*60000).length,pn=U.filter(u=>u.status==='pending'&&u.email!==FB.ADMIN).length;
  ad.innerHTML='<div class="stat"><div><b>'+AR(U.length-1<0?0:U.length-1)+'</b><small>طالب مسجّل</small></div><div><b>'+AR(pn)+'</b><small>بانتظار موافقتك</small></div><div><b>'+AR(on)+'</b><small>متصلين الآن</small></div></div>'
  +U.filter(u=>u.email!==FB.ADMIN).map(u=>{const st=u.status==='approved'?'<span class="pill g">مقبول</span>':u.status==='blocked'?'<span class="pill r">موقوف</span>':'<span class="pill y">بانتظار</span>';
-  return '<div class="ur"><div><b>'+esc(u.name)+'</b> '+st+'<small dir="ltr" style="text-align:right">'+esc(u.phone||'')+' · '+esc(u.email)+'</small><small>'+ago(u.lastSeen)+'</small></div><div class="ua">'
+  const GK=DATA.filter(b=>b.videos.length).map(b=>b.key),sel=Array.isArray(u.grades)&&u.grades.length?u.grades:GK;
+  const chips='<div class="gch" data-gu="'+u.uid+'"><small>الصفوف المسموحة:</small>'+GK.map(k=>'<label class="gc'+(sel.includes(k)?' on':'')+'"><input type="checkbox" value="'+k+'"'+(sel.includes(k)?' checked':'')+'>'+esc(GRADE[k][0])+'</label>').join('')+'</div>';
+  return '<div class="ur"><div><b>'+esc(u.name)+'</b> '+st+'<small dir="ltr" style="text-align:right">'+esc(u.phone||'')+' · '+esc(u.email)+'</small><small>'+ago(u.lastSeen)+'</small>'+chips+'</div><div class="ua">'
   +(u.status!=='approved'?'<button class="btn gold" data-a="approved" data-u="'+u.uid+'">'+(u.status==='blocked'?'إعادة تفعيل':'موافقة')+'</button>':'<button class="btn" data-a="blocked" data-u="'+u.uid+'">إيقاف</button>')
   +(u.status==='pending'?'<button class="btn red" data-a="blocked" data-u="'+u.uid+'">رفض</button>':'')
   +'<button class="btn red" data-d="'+u.uid+'">حذف</button></div></div>'}).join('')||'<div class="empty">ما في طلاب لسا</div>';
+ ad.querySelectorAll('.gch input').forEach(i=>i.onchange=()=>{const w=i.closest('.gch'),all=[...w.querySelectorAll('input')],ch=all.filter(x=>x.checked).map(x=>x.value);if(!ch.length){i.checked=true;toast('لازم صف واحد على الأقل');return}i.parentNode.classList.toggle('on',i.checked);FB.setGrades(w.dataset.gu,ch.length===all.length?[]:ch).then(()=>toast('تم حفظ الصفوف')).catch(e=>toast(errT(e)))});
  ad.querySelectorAll('[data-a]').forEach(b=>b.onclick=()=>FB.setStatus(b.dataset.u,b.dataset.a).then(()=>adStudents(ad)).catch(e=>toast(errT(e))));
  ad.querySelectorAll('[data-d]').forEach(b=>b.onclick=()=>{if(b.dataset.c){FB.delUser(b.dataset.d).then(()=>adStudents(ad)).catch(e=>toast(errT(e)))}else{b.dataset.c=1;b.textContent='تأكيد الحذف؟'}})}
 async function adResults(ad){

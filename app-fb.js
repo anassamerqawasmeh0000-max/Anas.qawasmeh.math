@@ -95,6 +95,7 @@ window.FB={
   blob,putBlob,kvGet,kvSet,logAttempt,logView,
   users:async()=>(await getDocs(collection(db,'users'))).docs.map(d=>Object.assign({uid:d.id},d.data())),
   setStatus:(uid,s)=>updateDoc(doc(db,'users',uid),{status:s}),
+  setGrades:(uid,g)=>updateDoc(doc(db,'users',uid),{grades:g}),
   delUser:uid=>deleteDoc(doc(db,'users',uid)),
   atts:n=>rows('att',n),views:n=>rows('vw',n)
 };
