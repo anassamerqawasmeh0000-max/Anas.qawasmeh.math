@@ -377,7 +377,7 @@ function mkPage(){
  document.getElementById('mg').onclick=()=>{
   const lv=document.getElementById('ml').value,n=+document.getElementById('mc').value,un=+mu.value,bk=mb.value,m=document.getElementById('mm');
   m.textContent='جاري التجهيز…';
-  quizList().then(L=>{L=L.filter(x=>(x.unit||1)===un&&qbk(x.id)===bk&&(!lv||x.level===lv)&&x.level);if(!L.length){m.textContent='ما في أسئلة مناسبة لهذا الاختيار بعد.';return}
+  quizList().then(L=>{const base=L.filter(x=>(x.unit||1)===un&&qbk(x.id)===bk);L=base.filter(x=>!lv||x.level===lv);if(!L.length){m.textContent=base.length&&lv?'هذه الوحدة فيها نماذج امتحانات كاملة فقط بدون تقسيم للمستويات، اختر «كل المستويات».':'ما في أسئلة مناسبة لهذا الاختيار بعد.';return}
    return Promise.all(L.map(x=>loadQuiz(x.id))).then(qs=>{let P=[];qs.forEach(q=>q.questions.forEach(x=>P.push(Object.assign({},x,{key:q.id+':'+x.n}))));
     for(let i=P.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[P[i],P[j]]=[P[j],P[i]]}
     P=P.slice(0,n).map((x,i)=>Object.assign(x,{n:i+1,marks:1}));
