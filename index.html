@@ -76,6 +76,16 @@ video{width:100%;height:100%;display:block;background:#000}
 .ex b{display:block;font-family:'Reem Kufi',Cairo;font-size:19px;color:var(--fg)}.ex span{color:var(--mut);font-size:14px}
 footer{text-align:center;color:var(--mut);font-size:14px;padding:20px 16px 40px}
 .empty{padding:30px;text-align:center;color:var(--mut)}
+.tools{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:0 0 6px}
+.tools a{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 10px;text-align:center;font-family:'Reem Kufi',Cairo;font-size:17px;display:flex;flex-direction:column;gap:2px;align-items:center}
+.tools a span{font-size:26px;line-height:1.2}.tools a small{font-family:Cairo;color:var(--mut);font-size:12px}
+.tools a:active,.tools a:hover{border-color:var(--gold)}
+.gsearch{display:flex;gap:8px;margin:0 0 12px}.gsearch input{flex:1;min-width:0;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:#0d1d3c;color:var(--fg);font:inherit}
+.fxc{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin:8px 0}.fxc h4{margin:0 0 4px;color:var(--gold);font-family:'Reem Kufi',Cairo;font-size:17px}.fxc div{overflow-x:auto;padding:2px 0}
+.stat{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:10px 0}.stat div{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px;text-align:center}.stat b{display:block;font-family:'Reem Kufi',Cairo;font-size:24px;color:var(--gold)}.stat small{color:var(--mut)}
+.row{display:flex;justify-content:space-between;gap:8px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:9px 12px;margin:6px 0;font-size:15px}.row small{color:var(--mut)}
+.mkf{display:grid;gap:10px}.mkf label{display:grid;gap:4px;color:var(--mut);font-size:14px}.mkf select{padding:11px;border-radius:10px;border:1px solid var(--line);background:#0d1d3c;color:var(--fg);font:inherit}
+.chk{display:flex!important;gap:8px;align-items:flex-start;color:var(--fg);font-size:15px;margin:10px 0}.chk input{margin-top:6px;width:18px;height:18px}
 </style>
 <link rel="stylesheet" href="katex/katex.min.css">
 <style>
@@ -153,12 +163,14 @@ const GRADE={f3:['أول ثانوي','الرياضيات'],s3:['ثاني ثان�
 function home(){
  document.title='منصة الرائد في الرياضيات';
  let s='<div class="hero"><div class="tx"><small>الأستاذ</small><h1>أنس القواسمة</h1><p>منصة الرائد في الرياضيات</p></div><div class="ph"><img src="assets/anas.webp" alt="الأستاذ أنس القواسمة"></div></div>'
+ +'<form class="gsearch" id="hs"><input type="search" id="hq" placeholder="🔍 ابحث عن فيديو أو اختبار…"><button class="btn gold">بحث</button></form><div class="tools"><a href="#me"><span>📈</span>تقدّمي<small>نتائجي</small></a><a href="#wrong"><span>📕</span>دفتر أخطائي<small>راجع أخطاءك</small></a><a href="#mk"><span>🎲</span>اختبار مخصص<small>اختر وابدأ</small></a><a href="#fx"><span>📐</span>قوانين<small>مراجعة سريعة</small></a></div>'
  +'<h2 class="gh">📚 كتبي</h2><p class="sub">اختر كتابك لتدخل على وحداته.</p><div class="bk">';
  const card=(b,href,tst)=>{const I=ICON[b.key]||['','#fff'],G=GRADE[b.key];return '<a class="bc" style="--c:'+I[1]+'" href="'+href+'"><div class="im"><div class="bkart"><i>'+esc(G[0])+'</i><h4>'+esc(G[1])+'</h4><em>'+I[0]+'</em></div><img src="assets/book-'+b.key+'.jpg" alt="" onerror="this.remove()">'+(tst?'<u>📝</u>':'')+'</div><b>'+(tst?'اختبارات ':'')+esc(G[0])+'</b><small>'+esc(G[1])+'</small></a>'};
  DATA.forEach(b=>{s+=card(b,'#h-'+b.key,0)});
  s+='</div><h2 class="gh">📝 الاختبارات</h2><p class="sub">اختبارات كل كتاب على حدة.</p><div class="bk">';
  DATA.forEach(b=>{s+=card(b,'#t-'+b.key,1)});
  app.innerHTML=s+'</div>';
+ document.getElementById('hs').onsubmit=e=>{e.preventDefault();location.hash='s-'+encodeURIComponent(document.getElementById('hq').value)};
 }
 function hub(b,T){
  const G=GRADE[b.key],U=UNITS[b.key];document.title=G[0]+' — '+G[1];
@@ -223,19 +235,21 @@ let Q=null,ST=null,TM=null;
 function loadQuiz(id){return QS[id]?Promise.resolve(QS[id]):fetch('quiz/'+id+'.json').then(r=>{if(!r.ok)throw 0;return r.json()}).then(j=>QS[id]=j)}
 function quizList(){return QI?Promise.resolve(QI):fetch('quiz/index.json').then(r=>r.ok?r.json():[]).catch(()=>[]).then(j=>QI=j)}
 function qstart(id){
+ if(id==='custom'){const c=LS.get('cq');if(!c){location.hash='mk';return}Q=c;ST=LS.get('qz-custom')||null;return qintro()}
  app.innerHTML='<div class="empty">جاري التحميل…</div>';
  loadQuiz(id).then(q=>{Q=q;ST=LS.get('qz-'+id)||null;qintro()}).catch(()=>{app.innerHTML='<div class="empty">تعذّر تحميل الاختبار، حاول مرة ثانية.</div>'});
 }
 function qintro(){
  clearInterval(TM);document.title=Q.title;
  const has=ST&&!ST.done&&ST.start;
- app.innerHTML='<div class="crumb"><a href="#">الرئيسية</a> ‹ <a href="#t-f3-u'+(Q.unit||1)+'">الوحدة '+UN[(Q.unit||1)-1]+'</a></div><div class="qz-card"><h1>'+esc(Q.title)+'</h1>'
+ app.innerHTML='<div class="crumb"><a href="#">الرئيسية</a> ‹ <a href="'+qback()+'">'+(Q.id==='custom'?'اختبار مخصص':'الوحدة '+UN[(Q.unit||1)-1])+'</a></div><div class="qz-card"><h1>'+esc(Q.title)+'</h1>'
  +'<p class="sub">اختبار تفاعلي — أجب عن الأسئلة، وبعد التسليم تشاهد علامتك وطريقة حل كل سؤال.</p>'
  +'<div class="chips"><span class="pill">عدد الأسئلة: '+N(Q.questions.length)+'</span><span class="pill">العلامة: '+N(Q.total)+'</span><span class="pill">الزمن: '+esc(Q.time)+'</span></div>'
  +'<div class="note">يمكنك التنقل بين الأسئلة وتغيير إجابتك قبل التسليم. تقدّمك يُحفظ على جهازك إذا خرجت من الصفحة.</div>'
+ +(has?'':'<label class="chk"><input type="checkbox" id="ex"><span>🎯 وضع الامتحان: بدون رجوع للأسئلة السابقة ولا قائمة الأسئلة</span></label>')
  +'<div class="qnav">'+(has?'<button class="btn gold" id="go">متابعة الاختبار</button><button class="btn" id="re">ابدأ من جديد</button>':'<button class="btn gold" id="go">ابدأ الاختبار</button>')+'</div></div>'
  +(ST&&ST.done?'<div class="qnav"><button class="btn" id="last">عرض نتيجتي السابقة</button></div>':'');
- document.getElementById('go').onclick=()=>{if(!has)ST={start:Date.now(),a:{},i:0};qrun()};
+ document.getElementById('go').onclick=()=>{if(!has){const e=document.getElementById('ex');ST={start:Date.now(),a:{},i:0,exam:!!(e&&e.checked)}}qrun()};
  const re=document.getElementById('re');if(re)re.onclick=()=>{ST={start:Date.now(),a:{},i:0};LS.set('qz-'+Q.id,ST);qrun()};
  const la=document.getElementById('last');if(la)la.onclick=()=>qresult();
 }
@@ -250,13 +264,13 @@ function qrun(){
  +'<div class="qz-bar"><i style="width:'+(done/n*100)+'%"></i></div>'
  +'<div class="qz-card"><div class="qt"><span class="qn">'+N(q.n)+'</span>'+q.q+'</div>'+(q.fig?'<img class="qfig" src="'+q.fig+'" alt="">':'')
  +'<div class="ops">'+['a','b','c','d'].filter(k=>q.opts[k]!=null).map(k=>'<button class="op'+(q.opts[k].indexOf('mtable')>=0?' cs':'')+(sel===k?' sel':'')+'" data-k="'+k+'"><b>'+k+'</b><span>'+q.opts[k]+'</span></button>').join('')+'</div></div>'
- +'<div class="qnav"><button class="btn" id="pv"'+(ST.i?'':' disabled style="opacity:.4"')+'>› السابق</button><button class="btn" id="gr">☰ الأسئلة</button>'+(ST.i<n-1?'<button class="btn gold" id="nx">التالي ‹</button>':'<button class="btn gold" id="fin">إنهاء وتسليم</button>')+'</div>'
+ +'<div class="qnav">'+(ST.exam?'':'<button class="btn" id="pv"'+(ST.i?'':' disabled style="opacity:.4"')+'>› السابق</button><button class="btn" id="gr">☰ الأسئلة</button>')+(ST.i<n-1?'<button class="btn gold" id="nx">التالي ‹</button>':'<button class="btn gold" id="fin">إنهاء وتسليم</button>')+'</div>'
  +'<div class="qnav"><button class="btn red" id="fin2">إنهاء وتسليم الاختبار</button></div><div id="gw"></div>';
  app.querySelectorAll('.op').forEach(b=>b.onclick=()=>{const k=b.dataset.k;if(ST.a[q.n]===k)delete ST.a[q.n];else ST.a[q.n]=k;LS.set('qz-'+Q.id,ST);const y=scrollY;qrun();scrollTo(0,y)});
  const go=d=>{ST.i=Math.min(n-1,Math.max(0,ST.i+d));qrun();scrollTo(0,0)};
- document.getElementById('pv').onclick=()=>go(-1);const nx=document.getElementById('nx');if(nx)nx.onclick=()=>go(1);
+ const pvb=document.getElementById('pv');if(pvb)pvb.onclick=()=>go(-1);const nx=document.getElementById('nx');if(nx)nx.onclick=()=>go(1);
  const fin=document.getElementById('fin');if(fin)fin.onclick=qconfirm;document.getElementById('fin2').onclick=qconfirm;
- document.getElementById('gr').onclick=()=>{const g=document.getElementById('gw');if(g.innerHTML){g.innerHTML='';return}
+ const grb=document.getElementById('gr');if(grb)grb.onclick=()=>{const g=document.getElementById('gw');if(g.innerHTML){g.innerHTML='';return}
   g.innerHTML='<div class="grid">'+Q.questions.map((x,i)=>'<button data-i="'+i+'" class="'+(ST.a[x.n]?'done ':'')+(i===ST.i?'cur':'')+'">'+N(x.n)+'</button>').join('')+'</div>';
   g.querySelectorAll('button').forEach(b=>b.onclick=()=>{ST.i=+b.dataset.i;qrun();scrollTo(0,0)});g.scrollIntoView({behavior:'smooth'})};
  clearInterval(TM);const lim=qlimit();const tick=()=>{const left=lim-Math.floor((Date.now()-ST.start)/1000);const e=document.getElementById('tm');if(e)e.textContent='⏱ '+fmt(left);if(left<=0){clearInterval(TM);qsubmit()}};tick();TM=setInterval(tick,1000);
@@ -268,14 +282,14 @@ function qconfirm(){
  document.body.appendChild(m);m.querySelector('#no').onclick=()=>m.remove();m.querySelector('#yes').onclick=()=>{m.remove();qsubmit()};
 }
 function qscore(){let s=0;Q.questions.forEach(q=>{if(ST.a[q.n]===q.ans)s+=q.marks});return s}
-function qsubmit(){clearInterval(TM);ST.done=true;ST.score=qscore();ST.end=Date.now();LS.set('qz-'+Q.id,ST);qresult()}
+function qsubmit(){clearInterval(TM);ST.done=true;ST.score=qscore();ST.end=Date.now();LS.set('qz-'+Q.id,ST);histAdd();wrongSync();qresult()}
 function qresult(f){
  clearInterval(TM);f=f||'all';const n=Q.questions.length;const sc=ST.score!=null?ST.score:qscore(),tot=Q.total,p=Math.round(sc/tot*100);
  const ok=Q.questions.filter(q=>ST.a[q.n]===q.ans).length,no=Q.questions.filter(q=>!ST.a[q.n]).length,bad=n-ok-no;
  const msg=p>=90?'ممتاز! مستواك رائع 🌟':p>=75?'جيد جداً، كمّل 👏':p>=60?'جيد، راجع الأخطاء وستتحسن 💪':p>=50?'مقبول، تحتاج مراجعة أكثر':'تحتاج إلى مراجعة الدرس وإعادة المحاولة';
  const list=Q.questions.filter(q=>f==='all'||(f==='bad'&&ST.a[q.n]&&ST.a[q.n]!==q.ans)||(f==='no'&&!ST.a[q.n]));
  document.title='نتيجتك — '+Q.title;
- app.innerHTML='<div class="crumb"><a href="#">الرئيسية</a> ‹ <a href="#t-f3-u'+(Q.unit||1)+'">الوحدة '+UN[(Q.unit||1)-1]+'</a> ‹ النتيجة</div><div class="qz-card score"><div class="ring" style="--p:'+p+'"><div><span>'+N(sc)+'<small>من '+N(tot)+'</small></span></div></div><h2 style="margin:14px 0 2px;font-family:Reem Kufi,Cairo">'+N(p)+'٪</h2><div>'+msg+'</div>'
+ app.innerHTML='<div class="crumb"><a href="#">الرئيسية</a> ‹ <a href="'+qback()+'">'+(Q.id==='custom'?'اختبار مخصص':'الوحدة '+UN[(Q.unit||1)-1])+'</a> ‹ النتيجة</div><div class="qz-card score"><div class="ring" style="--p:'+p+'"><div><span>'+N(sc)+'<small>من '+N(tot)+'</small></span></div></div><h2 style="margin:14px 0 2px;font-family:Reem Kufi,Cairo">'+N(p)+'٪</h2><div>'+msg+'</div>'
  +'<div class="chips" style="justify-content:center"><span class="pill">✅ صحيحة: '+N(ok)+'</span><span class="pill">❌ خاطئة: '+N(bad)+'</span><span class="pill">➖ بدون إجابة: '+N(no)+'</span></div></div>'
  +'<div class="grid gr2">'+Q.questions.map(q=>'<button data-n="'+q.n+'" class="'+(ST.a[q.n]===q.ans?'ok':ST.a[q.n]?'bad':'')+'">'+N(q.n)+'</button>').join('')+'</div>'
  +'<div class="sh">مراجعة الأسئلة وطريقة الحل</div><div class="chips"><button class="chip'+(f==='all'?' on':'')+'" data-f="all">الكل ('+N(n)+')</button><button class="chip'+(f==='bad'?' on':'')+'" data-f="bad">الأخطاء ('+N(bad)+')</button><button class="chip'+(f==='no'?' on':'')+'" data-f="no">بدون إجابة ('+N(no)+')</button></div>'
@@ -283,17 +297,99 @@ function qresult(f){
   return '<details class="rv '+c+'" id="r'+q.n+'"'+(f!=='all'?' open':'')+'><summary><span class="qn">'+N(q.n)+'</span><span style="flex:1">'+(c==='ok'?'✅ إجابتك صحيحة':c==='bad'?'❌ إجابتك خاطئة':'➖ لم تجب')+'</span><small style="color:var(--mut)">'+(a?'إجابتك: '+a+' — ':'')+'الصحيحة: '+q.ans+'</small></summary><div class="bd"><div class="qt">'+q.q+'</div>'+(q.fig?'<img class="qfig" src="'+q.fig+'" alt="">':'')
   +'<div class="ops">'+['a','b','c','d'].filter(k=>q.opts[k]!=null).map(k=>'<div class="op '+(q.opts[k].indexOf('mtable')>=0?'cs ':'')+(k===q.ans?'ok':k===a?'bad':'')+'"><b>'+k+'</b><span>'+q.opts[k]+'</span></div>').join('')+'</div>'
   +'<div class="sol"><h4>طريقة الحل</h4><ol>'+q.sol.map(s=>'<li>'+s+'</li>').join('')+'</ol></div></div></details>'}).join(''):'<div class="empty">لا توجد أسئلة في هذا القسم 👏</div>')
- +'<div class="qnav"><button class="btn gold" id="again">🔁 حل الاختبار من جديد</button><a class="btn" href="#t-f3-u'+(Q.unit||1)+'">رجوع للاختبارات</a></div>';
+ +'<div class="qnav"><button class="btn gold" id="again">🔁 حل الاختبار من جديد</button><button class="btn" id="shr">📤 مشاركة نتيجتي</button><a class="btn" href="'+qback()+'">رجوع</a></div>';
  app.querySelectorAll('[data-f]').forEach(b=>b.onclick=()=>qresult(b.dataset.f));
  app.querySelectorAll('.grid.gr2 button').forEach(b=>b.onclick=()=>{const d=document.getElementById('r'+b.dataset.n);if(d){d.open=true;d.scrollIntoView({behavior:'smooth'})}else qresult('all')});
+ document.getElementById('shr').onclick=shareRes;
  document.getElementById('again').onclick=()=>{ST={start:Date.now(),a:{},i:0};LS.set('qz-'+Q.id,ST);qrun();scrollTo(0,0)};
  scrollTo(0,0);
+}
+
+const qbk=id=>/^(U3|S)/.test(id)?'s3':'f3';
+const qbook=qbk;
+const qback=()=>Q.id==='custom'?'#mk':'#t-'+qbk(Q.id)+'-u'+(Q.unit||1);
+const pct=(a,b)=>b?Math.round(a/b*100):0;
+const dstr=t=>{try{return new Date(t).toLocaleDateString('ar-JO')}catch(e){return ''}};
+function histAdd(){const H=LS.get('hist')||[];H.push({id:Q.id,title:Q.title,score:ST.score,total:Q.total,t:Date.now(),exam:!!ST.exam});LS.set('hist',H.slice(-300))}
+function wrongSync(){const W=LS.get('wrong')||{};Q.questions.forEach(q=>{const k=q.key||Q.id+':'+q.n;if(ST.a[q.n]!==q.ans){if(!W[k])W[k]={q:q.q,opts:q.opts,ans:q.ans,sol:q.sol,fig:q.fig||'',title:Q.title,c:0}}});LS.set('wrong',W)}
+function shareRes(){const sc=ST.score,tot=Q.total;const t='حليت «'+Q.title+'» على منصة الرائد في الرياضيات وجبت '+sc+' من '+tot+' ('+pct(sc,tot)+'٪)';const u=location.origin+location.pathname;
+ if(navigator.share){navigator.share({text:t,url:u}).catch(()=>{})}else{try{navigator.clipboard.writeText(t+'\n'+u).then(()=>toast('تم نسخ النتيجة'))}catch(e){toast('تعذّر النسخ')}}}
+function toast(m){const d=document.createElement('div');d.textContent=m;d.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#0d1d3c;border:1px solid var(--gold2);color:var(--fg);padding:10px 18px;border-radius:12px;z-index:99';document.body.appendChild(d);setTimeout(()=>d.remove(),2200)}
+function mePage(){
+ document.title='تقدّمي';const H=LS.get('hist')||[];
+ const avg=H.length?Math.round(H.reduce((a,h)=>a+pct(h.score,h.total),0)/H.length):0,best=H.length?Math.max(...H.map(h=>pct(h.score,h.total))):0;
+ app.innerHTML='<div class="crumb"><a href="#">الرئيسية</a> ‹ تقدّمي</div><h1>📈 تقدّمي</h1><p class="sub">نتائجك محفوظة على هذا الجهاز فقط.</p>'
+ +'<div class="stat"><div><b>'+AR(H.length)+'</b><small>اختبار محلول</small></div><div><b>'+AR(avg)+'٪</b><small>المتوسط</small></div><div><b>'+AR(best)+'٪</b><small>أفضل نتيجة</small></div></div>'
+ +(H.length?'<div class="sh">آخر المحاولات</div>'+H.slice().reverse().slice(0,25).map(h=>'<div class="row"><span>'+esc(h.title)+(h.exam?' 🎯':'')+'<br><small>'+dstr(h.t)+'</small></span><b style="color:'+(pct(h.score,h.total)>=60?'#5fd6a3':'#ff8a8a')+'">'+AR(pct(h.score,h.total))+'٪</b></div>').join(''):'<div class="empty">ما حليت أي اختبار بعد. ابدأ من الصفحة الرئيسية.</div>');
+}
+let WI=null,WP=null;
+function wrongPage(){
+ document.title='دفتر أخطائي';const W=LS.get('wrong')||{},ks=Object.keys(W);
+ let h='<div class="crumb"><a href="#">الرئيسية</a> ‹ دفتر أخطائي</div><h1>📕 دفتر أخطائي</h1><p class="sub">الأسئلة اللي أخطأت فيها أو تركتها تنحفظ هون. أجب صح مرتين وتنشال من الدفتر.</p>';
+ if(!ks.length){app.innerHTML=h+'<div class="empty">الدفتر فاضي 👏 كمّل حل الاختبارات.</div>';return}
+ if(WI===null||!W[WI])WI=ks[Math.floor(Math.random()*ks.length)];
+ const w=W[WI];
+ h+='<div class="chips"><span class="pill">في الدفتر: '+AR(ks.length)+' سؤال</span></div><div class="qz-card"><small style="color:var(--mut)">'+esc(w.title)+'</small><div class="qt">'+w.q+'</div>'+(w.fig?'<img class="qfig" src="'+w.fig+'" alt="">':'')+'<div class="ops">'
+ +['a','b','c','d'].filter(k=>w.opts[k]!=null).map(k=>'<button class="op'+(w.opts[k].indexOf('mtable')>=0?' cs':'')+(WP?(k===w.ans?' ok':k===WP?' bad':''):'')+'" data-k="'+k+'"'+(WP?' disabled':'')+'><b>'+k+'</b><span>'+w.opts[k]+'</span></button>').join('')+'</div>'
+ +(WP?'<div class="sol"><h4>'+(WP===w.ans?'✅ صح':'❌ غلط')+' — طريقة الحل</h4><ol>'+w.sol.map(x=>'<li>'+x+'</li>').join('')+'</ol></div>':'')+'</div>'
+ +'<div class="qnav">'+(WP?'<button class="btn gold" id="nx">السؤال التالي ‹</button>':'<button class="btn" id="sk">تخطّي</button>')+'</div>';
+ app.innerHTML=h;
+ app.querySelectorAll('.op').forEach(b=>b.onclick=()=>{WP=b.dataset.k;const W2=LS.get('wrong')||{};if(W2[WI]){if(WP===w.ans){W2[WI].c=(W2[WI].c||0)+1;if(W2[WI].c>=2)W2[WI]._del=1}else W2[WI].c=0;LS.set('wrong',W2)}wrongPage()});
+ const nx=document.getElementById('nx');if(nx)nx.onclick=()=>{const W2=LS.get('wrong')||{};if(W2[WI]&&W2[WI]._del)delete W2[WI];LS.set('wrong',W2);WI=null;WP=null;wrongPage();scrollTo(0,0)};
+ const sk=document.getElementById('sk');if(sk)sk.onclick=()=>{WI=null;wrongPage()};
+}
+function mkPage(){
+ document.title='اختبار مخصص';
+ const u=[['s3','ثاني ثانوي متقدم'],['f3','أول ثانوي']];
+ app.innerHTML='<div class="crumb"><a href="#">الرئيسية</a> ‹ اختبار مخصص</div><h1>🎲 اختبار مخصص</h1><p class="sub">اختر وأنا بجهّز لك ورقة جديدة من بنك الأسئلة.</p><div class="qz-card mkf">'
+ +'<label>الكتاب<select id="mb">'+u.map(x=>'<option value="'+x[0]+'">'+x[1]+'</option>').join('')+'</select></label>'
+ +'<label>الوحدة<select id="mu"></select></label>'
+ +'<label>المستوى<select id="ml"><option value="">كل المستويات</option><option value="E">سهل</option><option value="M">متوسط</option><option value="H">صعب</option></select></label>'
+ +'<label>عدد الأسئلة<select id="mc"><option>10</option><option selected>20</option><option>30</option><option>50</option></select></label>'
+ +'<label class="chk"><input type="checkbox" id="mx"><span>وضع الامتحان: بدون رجوع للأسئلة السابقة</span></label>'
+ +'<button class="btn gold" id="mg">ابدأ</button><div id="mm" class="sub"></div></div>';
+ const mb=document.getElementById('mb'),mu=document.getElementById('mu');
+ const fillU=()=>{mu.innerHTML=UNITS[mb.value].u.map((x,i)=>'<option value="'+(i+1)+'">'+esc(x[0])+'</option>').join('')};fillU();mb.onchange=fillU;
+ document.getElementById('mg').onclick=()=>{
+  const lv=document.getElementById('ml').value,n=+document.getElementById('mc').value,un=+mu.value,bk=mb.value,m=document.getElementById('mm');
+  m.textContent='جاري التجهيز…';
+  quizList().then(L=>{L=L.filter(x=>(x.unit||1)===un&&qbk(x.id)===bk&&(!lv||x.level===lv)&&x.level);if(!L.length){m.textContent='ما في أسئلة مناسبة لهذا الاختيار بعد.';return}
+   return Promise.all(L.map(x=>loadQuiz(x.id))).then(qs=>{let P=[];qs.forEach(q=>q.questions.forEach(x=>P.push(Object.assign({},x,{key:q.id+':'+x.n}))));
+    for(let i=P.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[P[i],P[j]]=[P[j],P[i]]}
+    P=P.slice(0,n).map((x,i)=>Object.assign(x,{n:i+1,marks:1}));
+    const cq={id:'custom',unit:un,title:'اختبار مخصص — '+UNITS[bk].u[un-1][0],time:Math.ceil(P.length*1.2)+' دقيقة',total:P.length,questions:P};
+    LS.set('cq',cq);ST={start:Date.now(),a:{},i:0,exam:document.getElementById('mx').checked};LS.set('qz-custom',ST);Q=cq;qrun();scrollTo(0,0)})}).catch(()=>{m.textContent='تعذّر التجهيز، حاول مرة ثانية.'})}
+}
+let FX=null;
+function fxPage(sel){
+ document.title='قوانين ومختصرات';
+ const go=()=>{sel=sel||'all';
+  app.innerHTML='<div class="crumb"><a href="#">الرئيسية</a> ‹ قوانين</div><h1>📐 قوانين ومختصرات</h1><p class="sub">مراجعة سريعة قبل الامتحان.</p><div class="chips"><button class="chip'+(sel==='all'?' on':'')+'" data-s="all">الكل</button>'+FX.map((x,i)=>'<button class="chip'+(sel==i?' on':'')+'" data-s="'+i+'">'+esc(x.t)+'</button>').join('')+'</div>'
+  +FX.map((x,i)=>(sel==='all'||sel==i)?'<div class="sh">'+esc(x.t)+'</div>'+x.items.map(it=>'<div class="fxc">'+(it.h?'<h4>'+it.h+'</h4>':'')+'<div>'+it.f+'</div></div>').join(''):'').join('');
+  app.querySelectorAll('[data-s]').forEach(b=>b.onclick=()=>fxPage(b.dataset.s))};
+ if(FX)return go();app.innerHTML='<div class="empty">جاري التحميل…</div>';
+ fetch('fx.json').then(r=>r.json()).then(j=>{FX=j;go()}).catch(()=>{app.innerHTML='<div class="empty">تعذّر التحميل، حاول مرة ثانية.</div>'});
+}
+function searchPage(q){
+ q=(q||'').trim();document.title='بحث';const ql=q.toLowerCase();
+ app.innerHTML='<div class="crumb"><a href="#">الرئيسية</a> ‹ بحث</div><h1>🔍 بحث</h1><form class="gsearch" id="gf"><input id="gq" type="search" placeholder="ابحث عن فيديو أو اختبار…" value="'+esc(q)+'"><button class="btn gold">بحث</button></form><div id="gr2"></div>';
+ document.getElementById('gf').onsubmit=e=>{e.preventDefault();location.hash='s-'+encodeURIComponent(document.getElementById('gq').value)};
+ if(!ql)return;
+ const box=document.getElementById('gr2');let o='';
+ DATA.forEach(b=>{const vs=b.videos.filter(v=>v.id.toLowerCase().includes(ql)||v.t.toLowerCase().includes(ql)).slice(0,30);if(vs.length)o+='<div class="lh"><span>🎬 '+esc(GRADE[b.key][0])+'</span><small>'+AR(vs.length)+'</small></div><div class="list">'+vs.map(v=>item(b,v)).join('')+'</div>'});
+ quizList().then(L=>{const ts=L.filter(x=>x.title.toLowerCase().includes(ql));if(ts.length)o+='<div class="lh"><span>📝 اختبارات</span><small>'+AR(ts.length)+'</small></div>'+ts.map(x=>'<a class="qc" href="#qz-'+x.id+'"><b>'+esc(x.title)+'</b><span>'+AR(x.count)+' سؤال</span></a>').join('');
+  box.innerHTML=o||'<div class="empty">ما في نتائج</div>'});
 }
 
 function render(){
  const h=decodeURIComponent(location.hash.replace('#',''));
  if(!h)return home();
  const qm=h.match(/^qz-([A-Za-z0-9-]+)$/);if(qm){return qstart(qm[1])}
+ if(h==='me'){clearInterval(TM);return mePage()}
+ if(h==='wrong'){clearInterval(TM);return wrongPage()}
+ if(h==='mk'){clearInterval(TM);return mkPage()}
+ if(h==='fx'){clearInterval(TM);return fxPage()}
+ const sm=h.match(/^s-(.*)$/);if(sm){clearInterval(TM);return searchPage(sm[1])}
  clearInterval(TM);
  const hm=h.match(/^h-([a-z0-9]+)$/i);if(hm){const hb=book(hm[1]);return hb?hub(hb):home()}
  const um=h.match(/^hu-([a-z0-9]+)-([1-4])$/i);if(um){const ub=book(um[1]);return ub&&+um[2]<=UNITS[ub.key].u.length?unitPage(ub,+um[2]):home()}
