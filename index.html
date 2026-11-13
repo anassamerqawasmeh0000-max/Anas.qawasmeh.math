@@ -526,13 +526,17 @@ async function adUpload(ad){
    lg('✅ خلصت');toast('تم رفع الأسئلة')}catch(e){lg('❌ '+(e&&e.message||e));this.disabled=false}}}
 /* ===== تثبيت المنصة كتطبيق ===== */
 (function(){let dp=null;const standalone=()=>matchMedia('(display-mode: standalone)').matches||navigator.standalone;
- const seen=()=>{try{return localStorage.getItem('pwa-seen')}catch(e){return 1}},mark=()=>{try{localStorage.setItem('pwa-seen','1')}catch(e){}};
- function bar(ios){if(standalone()||seen()||document.getElementById('pwab'))return;const d=document.createElement('div');d.id='pwab';
-  d.style.cssText='position:fixed;bottom:0;left:0;right:0;z-index:60;background:#14294f;border-top:2px solid var(--gold2);padding:12px max(16px,env(safe-area-inset-right)) calc(12px + env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left));display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap';
-  d.innerHTML='<span style="flex:1;min-width:200px">📲 ثبّت المنصة على جوالك '+(ios?'— اضغط زر المشاركة ثم «إضافة إلى الشاشة الرئيسية»':'ك تطبيق')+'</span>'+(ios?'':'<button class="btn gold" id="pwai">تثبيت</button>')+'<button class="btn" id="pwax">لاحقاً</button>';
-  document.body.appendChild(d);document.getElementById('pwax').onclick=()=>{mark();d.remove()};
-  const i=document.getElementById('pwai');if(i)i.onclick=()=>{if(dp){dp.prompt();dp.userChoice.finally(()=>{mark();d.remove()})}else{d.remove()}}}
- addEventListener('beforeinstallprompt',e=>{e.preventDefault();dp=e;setTimeout(()=>bar(false),4000)});
- if(/iphone|ipad|ipod/i.test(navigator.userAgent)&&!standalone())setTimeout(()=>bar(true),5000)})();
+ if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+ addEventListener('beforeinstallprompt',e=>{e.preventDefault();dp=e});
+ addEventListener('appinstalled',()=>{const x=document.getElementById('pwab');if(x)x.remove()});
+ if(standalone())return;
+ const ios=/iphone|ipad|ipod/i.test(navigator.userAgent);
+ const btn=document.createElement('button');btn.id='pwab';btn.innerHTML='📲 ثبّت التطبيق';
+ btn.style.cssText='position:fixed;bottom:calc(14px + env(safe-area-inset-bottom));left:max(14px,env(safe-area-inset-left));z-index:55;background:var(--gold);color:#0a1630;border:0;border-radius:30px;padding:10px 16px;font:700 15px Cairo,system-ui;box-shadow:0 4px 14px rgba(0,0,0,.45);cursor:pointer';
+ btn.onclick=()=>{if(dp){dp.prompt();dp.userChoice.finally(()=>{dp=null});return}
+  const m=document.createElement('div');m.className='modal';
+  m.innerHTML='<div><h3 style="margin-top:0;color:var(--gold)">📲 تثبيت المنصة على جوالك</h3>'+(ios?'<ol style="line-height:2;padding-right:20px"><li>اضغط زر <b>المشاركة</b> (المربع والسهم) أسفل سفاري</li><li>اختر <b>«إضافة إلى الشاشة الرئيسية»</b></li><li>اضغط <b>إضافة</b></li></ol>':'<ol style="line-height:2;padding-right:20px"><li>اضغط القائمة <b>⋮</b> أعلى المتصفح</li><li>اختر <b>«تثبيت التطبيق»</b> أو <b>«إضافة إلى الشاشة الرئيسية»</b></li><li>اضغط <b>تثبيت</b></li></ol><p class="sub">لازم تفتح الموقع من متصفح كروم (أندرويد) أو سفاري (آيفون).</p>')+'<button class="btn gold" style="width:100%" id="pwc">تمام</button></div>';
+  document.body.appendChild(m);m.onclick=e=>{if(e.target===m||e.target.id==='pwc')m.remove()}};
+ document.body.appendChild(btn)})();
 window.addEventListener('hashchange',render);bootApp();
 </script></body></html>
