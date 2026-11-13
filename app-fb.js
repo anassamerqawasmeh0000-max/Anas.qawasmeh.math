@@ -1,11 +1,11 @@
 /* الاتصال بالخادم: الحسابات + الأسئلة المحمية + المراقبة */
 import {initializeApp} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
 import {getAuth,onAuthStateChanged,createUserWithEmailAndPassword,signInWithEmailAndPassword,signOut,sendPasswordResetEmail,sendEmailVerification} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
-import {getFirestore,doc,getDoc,setDoc,updateDoc,deleteDoc,collection,getDocs,addDoc,query,orderBy,limit,onSnapshot} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+import {initializeFirestore,doc,getDoc,setDoc,updateDoc,deleteDoc,collection,getDocs,addDoc,query,orderBy,limit,onSnapshot} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
 const cfg={apiKey:"AIzaSyCM2ekbZQfb0zt1Z_gJwBH8URbEAnWT7J0",authDomain:"alraed-math-anas-qawasmeh.firebaseapp.com",projectId:"alraed-math-anas-qawasmeh",storageBucket:"alraed-math-anas-qawasmeh.firebasestorage.app",messagingSenderId:"690420503815",appId:"1:690420503815:web:177d4a289c4496fd6161a2"};
 const ADMIN='anassamerqawasmeh0000@gmail.com';
-const app=initializeApp(cfg),auth=getAuth(app),db=getFirestore(app);
+const app=initializeApp(cfg),auth=getAuth(app),db=initializeFirestore(app,{experimentalAutoDetectLongPolling:true});
 
 let state={stage:'loading'},subs=[],unsubProf=null,pend=null,creating=false,pingT=null;
 const emit=()=>subs.forEach(f=>{try{f(state)}catch(e){console.error(e)}});
