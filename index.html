@@ -96,6 +96,13 @@ footer{text-align:center;color:var(--mut);font-size:14px;padding:20px 16px 40px}
 .pill.g{border-color:#2fbf80;color:#7ee2b0}.pill.r{border-color:#e5584f;color:#ff9a93}.pill.y{border-color:var(--gold2);color:var(--gold)}
 .ulog{background:#0d1d3c;border:1px solid var(--line);border-radius:10px;padding:10px;max-height:240px;overflow:auto;font-size:13px;direction:ltr;white-space:pre-wrap}
 .gch{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:6px}.gch small{color:var(--muted)}.gc{border:1px solid #345;border-radius:20px;padding:3px 10px;font-size:13px;cursor:pointer;opacity:.55}.gc.on{opacity:1;border-color:var(--gold);color:var(--gold)}.gc input{display:none}
+.gm-lv{display:grid;gap:10px;margin:10px 0}.gm-lv .btn{font-size:17px;padding:14px;text-align:center}
+.gm-top{display:flex;justify-content:space-between;gap:8px;font-family:'Reem Kufi',Cairo;font-size:20px;margin-top:14px}.gm-top #gk{min-width:48px;text-align:left}
+.gm-bar{height:8px;background:var(--line);border-radius:6px;overflow:hidden;margin:8px 0}.gm-bar i{display:block;height:100%;width:100%;background:var(--gold2);transition:width 1s linear}
+.gm-q{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:26px 10px;text-align:center;font-size:30px;font-weight:700;margin:10px 0;line-height:1.6}
+.gm-o{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.gm-o .btn{font-size:24px;padding:16px 8px;min-height:60px}
+.gm-ok{background:#1f9d62!important;color:#fff!important;border-color:#1f9d62!important}.gm-no{background:#c2413a!important;color:#fff!important;border-color:#c2413a!important}
+.gm-end{text-align:center;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px 12px;margin-top:14px}.gm-big{font-family:'Reem Kufi',Cairo;font-size:54px;color:var(--gold)}.gm-big small{font-size:20px;color:var(--mut)}.gm-rec{color:var(--gold);font-size:20px;margin:0 0 8px}
 .soon{position:absolute;top:8px;left:8px;background:rgba(0,0,0,.65);color:#fff;font-size:11px;padding:2px 8px;border-radius:99px;text-decoration:none}
 </style>
 <link rel="stylesheet" href="katex/katex.min.css">
@@ -189,10 +196,63 @@ const UNITS={
  b2:{vu:2,u:[['الوحدة الأولى',''],['الوحدة الثانية: الخوارزميات ونظرية المخططات',''],['الوحدة الثالثة','']]}
 };
 const GRADE={g1:['الصف الأول','الرياضيات'],g2:['الصف الثاني','الرياضيات'],g3:['الصف الثالث','الرياضيات'],g4:['الصف الرابع','الرياضيات'],g5:['الصف الخامس','الرياضيات'],g6:['الصف السادس','الرياضيات'],g7:['الصف السابع','الرياضيات'],g8:['الصف الثامن','الرياضيات'],g9:['الصف التاسع','الرياضيات'],g10:['الصف العاشر','الرياضيات'],f3:['أول ثانوي','الرياضيات'],s3:['ثاني ثانوي متقدم','الرياضيات'],b2:['ثاني ثانوي أعمال','رياضيات الأعمال']};
+/* ===== لعبة تحدّي السرعة ===== */
+const GL={1:'سهل — جمع وطرح وضرب',2:'متوسط — أعداد سالبة ومربعات ونسب',3:'تحدّي — معادلات وميل وفيثاغورس'};
+const gR=(a,b)=>a+Math.floor(Math.random()*(b-a+1)),gP=a=>a[gR(0,a.length-1)];
+const gF=n=>n<0?'−'+(-n):''+n,gL=x=>'<bdi dir="ltr">'+x+'</bdi>';
+function gQ(l){let q,a;
+ if(l===1){const t=gR(0,3);
+  if(t===0){const x=gR(12,89),y=gR(11,79);q=gL(x+' + '+y);a=x+y}
+  else if(t===1){const x=gR(40,99),y=gR(11,39);q=gL(x+' − '+y);a=x-y}
+  else if(t===2){const x=gR(3,12),y=gR(3,12);q=gL(x+' × '+y);a=x*y}
+  else{const y=gR(3,12),r=gR(3,12);q=gL((y*r)+' ÷ '+y);a=r}}
+ else if(l===2){const t=gR(0,5);
+  if(t===0){const x=gR(-15,-2),y=gR(3,14);q=gL('('+gF(x)+') + '+y);a=x+y}
+  else if(t===1){const x=gR(-9,-2),y=gR(2,9);q=gL('('+gF(x)+') × '+y);a=x*y}
+  else if(t===2){const x=gR(6,15);q=gL(x+'²');a=x*x}
+  else if(t===3){const x=gR(4,15);q=gL('√'+(x*x));a=x}
+  else if(t===4){const p=gP([10,20,25,50]),x=gP([40,60,80,120,200]);q=gL(p+'%')+' من '+gL(x);a=p*x/100}
+  else{const x=gR(-9,9),y=gR(2,9);q=gL(gF(x)+' − ('+gF(-y)+')');a=x+y}}
+ else{const t=gR(0,4);
+  if(t===0){const x=gR(-8,12),m=gR(2,7),c=gR(-9,9);q='حُلّ المعادلة '+gL(m+'x + ('+gF(c)+') = '+gF(m*x+c))+' ← قيمة x = ؟';a=x}
+  else if(t===1){const x1=gR(-3,3),y1=gR(-4,4),m=gR(-4,4)||1,dx=gR(1,4);q='الميل بين النقطتين '+gL('('+gF(x1)+' , '+gF(y1)+')')+' و '+gL('('+gF(x1+dx)+' , '+gF(y1+m*dx)+')')+' = ؟';a=m}
+  else if(t===2){const tr=gP([[3,4,5],[5,12,13],[6,8,10],[8,15,17],[9,12,15]]);q='مثلث قائم ساقاه '+gL(tr[0])+' و '+gL(tr[1])+' ← طول الوتر = ؟';a=tr[2]}
+  else if(t===3){const p=gR(1,7),r=gR(1,7);q=gL('(x + '+p+')(x + '+r+') = x² + □x + '+(p*r))+' ← قيمة □ = ؟';a=p+r}
+  else{const x=gR(2,9),y=gR(2,9);q='إذا كان '+gL('x = '+x)+' فإن '+gL('3x² − '+y+'x')+' = ؟';a=3*x*x-y*x}}
+ const s=new Set([a]);const ds=[1,2,3,10,-1,-2,-10,5,-a,a*2];
+ while(s.size<4){const d=gP(ds);let v=typeof d==='number'&&(d===-a||d===a*2)?d:a+d;if(v!==a)s.add(v)}
+ return {q,a,o:[...s].sort(()=>Math.random()-.5)}}
+function gamePage(){
+ document.title='تحدّي السرعة';let best={};try{best=JSON.parse(localStorage.getItem('gbest')||'{}')}catch(e){}
+ const bs=l=>best[l]?' <small style="color:var(--mut)">(أعلى نتيجة: '+AR(best[l])+')</small>':'';
+ app.innerHTML='<div class="crumb"><a href="#">الرئيسية</a> ‹ تحدّي السرعة</div><h1>🎮 تحدّي السرعة</h1><p class="sub">عندك 60 ثانية. جاوب على أكبر عدد من الأسئلة بدون أخطاء، وكل جواب صح متتالي بزيدلك نقاط إضافية.</p>'
+ +'<div class="gm-lv">'+[1,2,3].map(l=>'<button class="btn gold" data-l="'+l+'">'+GL[l]+bs(l)+'</button>').join('')+'</div><div id="gm"></div>';
+ app.querySelectorAll('[data-l]').forEach(b=>b.onclick=()=>gStart(+b.dataset.l))}
+function gStart(l){clearInterval(TM);const gm=document.getElementById('gm');
+ let sc=0,st=0,ok=0,no=0,t=60,cur=null,lock=false;
+ gm.innerHTML='<div class="gm-top"><span id="gt">⏱ 60</span><span id="gs">النقاط: ٠</span><span id="gk"></span></div><div class="gm-bar"><i id="gb"></i></div><div class="gm-q" id="gq"></div><div class="gm-o" id="go"></div>';
+ gm.scrollIntoView({behavior:'smooth',block:'start'});
+ const nx=()=>{cur=gQ(l);lock=false;const q=document.getElementById('gq');q.innerHTML=cur.q;
+  const o=document.getElementById('go');o.innerHTML=cur.o.map(v=>'<button class="btn" data-v="'+v+'" dir="ltr">'+gF(v)+'</button>').join('');
+  o.querySelectorAll('button').forEach(b=>b.onclick=()=>an(b))};
+ const hud=()=>{document.getElementById('gs').textContent='النقاط: '+AR(sc);document.getElementById('gk').textContent=st>=3?'🔥 '+AR(st):''};
+ const an=b=>{if(lock||t<=0)return;lock=true;const good=+b.dataset.v===cur.a;
+  if(good){ok++;st++;sc+=10+Math.min(st-1,5)*2;b.classList.add('gm-ok')}else{no++;st=0;b.classList.add('gm-no');document.querySelectorAll('#go button').forEach(x=>{if(+x.dataset.v===cur.a)x.classList.add('gm-ok')})}
+  hud();setTimeout(()=>{if(t>0)nx()},good?250:900)};
+ TM=setInterval(()=>{t--;const e=document.getElementById('gt');if(!e){clearInterval(TM);return}e.textContent='⏱ '+t;document.getElementById('gb').style.width=(t/60*100)+'%';
+  if(t<=0){clearInterval(TM);end()}},1000);
+ const end=()=>{let best={};try{best=JSON.parse(localStorage.getItem('gbest')||'{}')}catch(e){}const nb=sc>(best[l]||0);if(nb){best[l]=sc;try{localStorage.setItem('gbest',JSON.stringify(best))}catch(e){}}
+  const acc=ok+no?Math.round(ok/(ok+no)*100):0;
+  gm.innerHTML='<div class="gm-end"><h2>⏰ انتهى الوقت!</h2><div class="gm-big">'+AR(sc)+' <small>نقطة</small></div>'+(nb&&sc>0?'<p class="gm-rec">🏆 رقم قياسي جديد!</p>':'')
+  +'<p>✅ إجابات صحيحة: <b>'+AR(ok)+'</b> &nbsp; ❌ خاطئة: <b>'+AR(no)+'</b> &nbsp; 🎯 الدقة: <b>'+AR(acc)+'%</b></p>'
+  +'<button class="btn gold" id="gag">🔁 العب مرة ثانية</button> <a class="btn" href="#game">تغيير المستوى</a></div>';
+  document.getElementById('gag').onclick=()=>gStart(l)};
+ nx()}
+
 function home(){
  document.title='منصة الرائد في الرياضيات';
  let s='<div class="hero"><div class="tx"><small>الأستاذ</small><h1>أنس القواسمة</h1><p>منصة الرائد في الرياضيات</p></div><div class="ph"><img src="assets/anas.webp" alt="الأستاذ أنس القواسمة"></div></div>'
- +'<form class="gsearch" id="hs"><input type="search" id="hq" placeholder="🔍 ابحث عن فيديو أو اختبار…"><button class="btn gold">بحث</button></form><div class="tools"><a href="#me"><span>📈</span>تقدّمي<small>نتائجي</small></a><a href="#wrong"><span>📕</span>دفتر أخطائي<small>راجع أخطاءك</small></a><a href="#mk"><span>🎲</span>اختبار مخصص<small>اختر وابدأ</small></a><a href="#fx"><span>📐</span>قوانين<small>مراجعة سريعة</small></a></div>'
+ +'<form class="gsearch" id="hs"><input type="search" id="hq" placeholder="🔍 ابحث عن فيديو أو اختبار…"><button class="btn gold">بحث</button></form><div class="tools"><a href="#me"><span>📈</span>تقدّمي<small>نتائجي</small></a><a href="#wrong"><span>📕</span>دفتر أخطائي<small>راجع أخطاءك</small></a><a href="#mk"><span>🎲</span>اختبار مخصص<small>اختر وابدأ</small></a><a href="#fx"><span>📐</span>قوانين<small>مراجعة سريعة</small></a><a href="#game"><span>🎮</span>تحدّي السرعة<small>لعبة رياضيات</small></a></div>'
  +'<h2 class="gh">📚 كتبي</h2><p class="sub">اختر كتابك لتدخل على وحداته.</p><div class="bk">';
  const card=(b,href,tst)=>{const I=ICON[b.key]||['','#fff'],G=GRADE[b.key];return '<a class="bc" style="--c:'+I[1]+'" href="'+href+'"><div class="im"><div class="bkart"><i>'+esc(G[0])+'</i><h4>'+esc(G[1])+'</h4><em>'+I[0]+'</em></div><img src="assets/book-'+b.key+'.jpg" alt="" onerror="this.remove()">'+(tst?'<u>📝</u>':'')+(b.videos.length?'':'<s class="soon">قريباً</s>')+'</div><b>'+(tst?'اختبارات ':'')+esc(G[0])+'</b><small>'+esc(G[1])+'</small></a>'};
  DATAV().forEach(b=>{s+=card(b,'#h-'+b.key,0)});
@@ -425,6 +485,7 @@ function render(){
  if(h==='wrong'){clearInterval(TM);return wrongPage()}
  if(h==='mk'){clearInterval(TM);return mkPage()}
  if(h==='fx'){clearInterval(TM);return fxPage()}
+ if(h==='game'){clearInterval(TM);return gamePage()}
  const sm=h.match(/^s-(.*)$/);if(sm){clearInterval(TM);return searchPage(sm[1])}
  clearInterval(TM);
  const hm=h.match(/^h-([a-z0-9]+)$/i);if(hm){const hb=book(hm[1]);return hb?hub(hb):home()}
