@@ -82,7 +82,7 @@ footer{text-align:center;color:var(--mut);font-size:14px;padding:20px 16px 40px}
 .tools a span{font-size:26px;line-height:1.2}.tools a small{font-family:Cairo;color:var(--mut);font-size:12px}
 .tools a:active,.tools a:hover{border-color:var(--gold)}
 .gsearch{display:flex;gap:8px;margin:0 0 12px}.gsearch input{flex:1;min-width:0;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:#0d1d3c;color:var(--fg);font:inherit}
-.fxc{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin:8px 0}.fxc h4{margin:0 0 4px;color:var(--gold);font-family:'Reem Kufi',Cairo;font-size:17px}.fxc div{overflow-x:auto;padding:2px 0}.bgrp{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0}.bg{background:var(--card);border:2px solid var(--line);border-radius:14px;padding:12px 8px;color:var(--fg,#fff);font:700 15px Cairo,sans-serif;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer}.bg span{font-size:28px}.bg small{font-weight:400;color:var(--muted,#9fb0d0);font-size:12px}.bg.on{border-color:var(--gold);background:rgba(255,209,102,.12)}.bg:last-child:nth-child(odd){grid-column:1/-1}.cf{display:block;width:100%;max-width:230px;margin:6px auto 4px;background:rgba(255,255,255,.06);border-radius:12px}
+.fxc{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin:8px 0}.fxc h4{margin:0 0 4px;color:var(--gold);font-family:'Reem Kufi',Cairo;font-size:17px}.fxc div{overflow-x:auto;padding:2px 0}.bsearch{width:100%;box-sizing:border-box;padding:11px 14px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:inherit;font:16px Cairo,sans-serif;margin:6px 0}.bgrp{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0}.bg{background:var(--card);border:2px solid var(--line);border-radius:14px;padding:12px 8px;color:var(--fg,#fff);font:700 15px Cairo,sans-serif;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer}.bg span{font-size:28px}.bg small{font-weight:400;color:var(--muted,#9fb0d0);font-size:12px}.bg.on{border-color:var(--gold);background:rgba(255,209,102,.12)}.bg:last-child:nth-child(odd){grid-column:1/-1}.cf{display:block;width:100%;max-width:230px;margin:6px auto 4px;background:rgba(255,255,255,.06);border-radius:12px}
 .stat{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:10px 0}.stat div{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px;text-align:center}.stat b{display:block;font-family:'Reem Kufi',Cairo;font-size:24px;color:var(--gold)}.stat small{color:var(--mut)}
 .row{display:flex;justify-content:space-between;gap:8px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:9px 12px;margin:6px 0;font-size:15px}.row small{color:var(--mut)}
 .mkf{display:grid;gap:10px}.mkf label{display:grid;gap:4px;color:var(--mut);font-size:14px}.mkf select{padding:11px;border-radius:10px;border:1px solid var(--line);background:#0d1d3c;color:var(--fg);font:inherit}
@@ -480,18 +480,27 @@ function lawsPage(sel){
  const go=()=>{sel=sel||'all';
   app.innerHTML='<div class="crumb"><a href="#">الرئيسية</a> ‹ قوانين مهمة</div><h1>📏 قوانين مهمة</h1><p class="sub">مساحات وحجوم، فيثاغورس، مسافات، وجبر.</p><div class="chips"><button class="chip'+(sel==='all'?' on':'')+'" data-s="all">الكل</button>'+LW.map((x,i)=>'<button class="chip'+(sel==i?' on':'')+'" data-s="'+i+'">'+esc(x.t)+'</button>').join('')+'</div>'
   +LW.map((x,i)=>(sel==='all'||sel==i)?'<div class="sh">'+esc(x.t)+'</div>'+x.items.map(it=>'<div class="fxc"><h4>'+it.h+'</h4>'+(it.g||'')+'<div>'+it.f+'</div></div>').join(''):'').join('');
-  app.querySelectorAll('[data-s]').forEach(b=>b.onclick=()=>lawsPage(b.dataset.s))};
+  app.insertAdjacentHTML('beforeend','<div class="chips" style="margin-top:18px"><a class="chip" href="#basics">🧮 أساسيات الرياضيات</a><a class="chip" href="#game">🎮 تحدّي السرعة</a></div>');app.querySelectorAll('[data-s]').forEach(b=>b.onclick=()=>lawsPage(b.dataset.s))};
  if(LW)return go();app.innerHTML='<div class="empty">جاري التحميل…</div>';
  fetch('laws.json?v=3').then(r=>r.json()).then(j=>{LW=j;go()}).catch(()=>{app.innerHTML='<div class="empty">تعذّر التحميل، حاول مرة ثانية.</div>'});
 }
-let BS=null;
+let BS=null,BQ='';
 function basicsPage(sel){
  document.title='أساسيات الرياضيات';
- const go=()=>{sel=(sel==null||sel==='')?'0':String(sel);const G=BS.groups,S=BS.secs;
-  app.innerHTML='<div class="crumb"><a href="#">الرئيسية</a> ‹ أساسيات الرياضيات</div><h1>🧮 أساسيات الرياضيات</h1><p class="sub">اختر المجموعة، وتصفّح الدروس بالأشكال.</p><div class="bgrp">'+G.map((g,i)=>'<button class="bg'+(sel===String(i)?' on':'')+'" data-s="'+i+'"><span>'+g.ic+'</span>'+esc(g.t)+'<small>'+S.filter(x=>x.grp===i).length+' دروس</small></button>').join('')+'</div>'
-  +'<div class="chips"><button class="chip'+(sel==='all'?' on':'')+'" data-s="all">عرض الكل</button></div>'
-  +S.filter(x=>sel==='all'||String(x.grp)===sel).map(x=>'<div class="sh">'+esc(x.t)+'</div>'+x.items.map(it=>'<div class="fxc"><h4>'+it.h+'</h4>'+(it.g||'')+'<div>'+it.f+'</div></div>').join('')).join('');
-  app.querySelectorAll('[data-s]').forEach(b=>b.onclick=()=>{basicsPage(b.dataset.s);window.scrollTo(0,0)})};
+ const plain=x=>x.replace(/<[^>]*>/g,' ').toLowerCase();
+ const card=it=>'<div class="fxc"><h4>'+it.h+'</h4>'+(it.g||'')+'<div>'+it.f+'</div></div>';
+ const cnt=n=>n===1?'درس واحد':n===2?'درسان':AR(n)+' دروس';
+ const go=()=>{sel=(sel==null||sel==='')?'0':String(sel);const G=BS.groups,S=BS.secs,q=BQ.trim().toLowerCase();
+  let body='';
+  if(q){const r=[];S.forEach(x=>x.items.forEach(it=>{if(plain(it.h+' '+x.t+' '+it.f).includes(q))r.push([x.t,it])}));
+   body='<div class="sub">'+(r.length?'نتائج البحث: '+AR(r.length):'ما لقينا نتيجة، جرّب كلمة ثانية.')+'</div>'+r.map(([t,it])=>'<div class="sh">'+esc(t)+'</div>'+card(it)).join('')}
+  else body='<div class="chips"><button class="chip'+(sel==='all'?' on':'')+'" data-s="all">عرض الكل</button></div>'
+   +S.filter(x=>sel==='all'||String(x.grp)===sel).map(x=>'<div class="sh">'+esc(x.t)+'</div>'+x.items.map(card).join('')).join('');
+  app.innerHTML='<div class="crumb"><a href="#">الرئيسية</a> ‹ أساسيات الرياضيات</div><h1>🧮 أساسيات الرياضيات</h1><p class="sub">اختر المجموعة، وتصفّح الدروس بالأشكال.</p><input type="search" id="bq" class="bsearch" placeholder="🔍 ابحث (مثال: كسور، دائرة، احتمال)…" value="'+esc(BQ)+'">'
+  +'<div class="bgrp">'+G.map((g,i)=>'<button class="bg'+(!q&&sel===String(i)?' on':'')+'" data-s="'+i+'"><span>'+g.ic+'</span>'+esc(g.t)+'<small>'+cnt(S.filter(x=>x.grp===i).length)+'</small></button>').join('')+'</div><div id="bbody">'+body+'</div>'
+  +'<div class="chips" style="margin-top:18px"><a class="chip" href="#laws">📏 قوانين مهمة</a><a class="chip" href="#game">🎮 تحدّي السرعة</a><a class="chip" href="#daily">💡 سؤال اليوم</a></div>';
+  app.querySelectorAll('[data-s]').forEach(b=>b.onclick=()=>{BQ='';basicsPage(b.dataset.s);window.scrollTo(0,0)});
+  const bi=document.getElementById('bq');bi.oninput=()=>{BQ=bi.value;const p=bi.selectionStart;basicsPage(sel);const n=document.getElementById('bq');n.focus();n.setSelectionRange(p,p)}};
  if(BS)return go();app.innerHTML='<div class="empty">جاري التحميل…</div>';
  fetch('basics.json?v=11').then(r=>r.json()).then(j=>{BS=j;go()}).catch(()=>{app.innerHTML='<div class="empty">تعذّر التحميل، حاول مرة ثانية.</div>'});
 }
