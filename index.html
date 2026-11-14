@@ -492,7 +492,7 @@ function basicsPage(sel){
   +BS.map((x,i)=>(sel==='all'||sel==i)?'<div class="sh">'+esc(x.t)+'</div>'+x.items.map(it=>'<div class="fxc"><h4>'+it.h+'</h4>'+(it.g||'')+'<div>'+it.f+'</div></div>').join(''):'').join('');
   app.querySelectorAll('[data-s]').forEach(b=>b.onclick=()=>basicsPage(b.dataset.s))};
  if(BS)return go();app.innerHTML='<div class="empty">جاري التحميل…</div>';
- fetch('basics.json?v=6').then(r=>r.json()).then(j=>{BS=j;go()}).catch(()=>{app.innerHTML='<div class="empty">تعذّر التحميل، حاول مرة ثانية.</div>'});
+ fetch('basics.json?v=8').then(r=>r.json()).then(j=>{BS=j;go()}).catch(()=>{app.innerHTML='<div class="empty">تعذّر التحميل، حاول مرة ثانية.</div>'});
 }
 let FX=null;
 function fxPage(sel){
