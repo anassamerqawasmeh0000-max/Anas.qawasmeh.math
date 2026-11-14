@@ -103,6 +103,7 @@ footer{text-align:center;color:var(--mut);font-size:14px;padding:20px 16px 40px}
 .gm-o{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.gm-o .btn{font-size:24px;padding:16px 8px;min-height:60px}
 .gm-ok{background:#1f9d62!important;color:#fff!important;border-color:#1f9d62!important}.gm-no{background:#c2413a!important;color:#fff!important;border-color:#c2413a!important}
 .gm-end{text-align:center;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px 12px;margin-top:14px}.gm-big{font-family:'Reem Kufi',Cairo;font-size:54px;color:var(--gold)}.gm-big small{font-size:20px;color:var(--mut)}.gm-rec{color:var(--gold);font-size:20px;margin:0 0 8px}
+.dq-q{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px 14px;font-size:20px;line-height:1.8;margin:10px 0}.dq-o{grid-template-columns:1fr}.dq-o .btn{text-align:right;font-size:18px;display:flex;gap:10px;align-items:center}.dq-o .btn b{color:var(--gold);min-width:1.2em}.dq-res{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin:12px 0}.dq-res h3{margin:0 0 6px}
 .soon{position:absolute;top:8px;left:8px;background:rgba(0,0,0,.65);color:#fff;font-size:11px;padding:2px 8px;border-radius:99px;text-decoration:none}
 </style>
 <link rel="stylesheet" href="katex/katex.min.css">
@@ -249,10 +250,31 @@ function gStart(l){clearInterval(TM);const gm=document.getElementById('gm');
   document.getElementById('gag').onclick=()=>gStart(l)};
  nx()}
 
+/* ===== سؤال اليوم ===== */
+const dKey=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
+const dGet=()=>{try{return JSON.parse(localStorage.getItem('dstreak')||'{}')}catch(e){return {}}};
+const dSet=o=>{try{localStorage.setItem('dstreak',JSON.stringify(o))}catch(e){}};
+const dStreak=()=>{const o=dGet(),y=new Date(Date.now()-864e5),yk=y.getFullYear()+'-'+String(y.getMonth()+1).padStart(2,'0')+'-'+String(y.getDate()).padStart(2,'0');return (o.last===dKey()||o.last===yk)?(o.n||0):0};
+function dailyPage(){document.title='سؤال اليوم';
+ app.innerHTML='<div class="crumb"><a href="#">الرئيسية</a> ‹ سؤال اليوم</div><h1>💡 سؤال اليوم</h1><div id="dq" class="empty">جاري التحميل…</div>';
+ quizList().then(L=>{L=L.filter(q=>/^G[89]/.test(q.id));if(!L.length)throw 0;
+  const day=Math.floor(Date.now()/864e5),qi=L[day%L.length];
+  return fetch('quiz/'+qi.id+'.json?v=2').then(r=>r.json()).then(Q=>({Q,qi,day}))}).then(({Q,qi,day})=>{
+  const qs=Q.questions,q=qs[(day*7)%qs.length],done=dGet().last===dKey();
+  const dq=document.getElementById('dq');dq.className='';
+  dq.innerHTML='<p class="sub">'+esc(qi.title.split('—').slice(0,2).join('—'))+'</p><div class="dq-q">'+q.q+'</div><div class="gm-o dq-o">'+['a','b','c','d'].filter(k=>q.opts[k]!=null).map(k=>'<button class="btn" data-k="'+k+'"><b>'+k+'</b> '+q.opts[k]+'</button>').join('')+'</div><div id="dr"></div><p class="sub" id="ds"></p>';
+  const show=()=>{document.getElementById('ds').textContent=dStreak()>0?'🔥 أيام متتالية: '+AR(dStreak()):''};show();
+  dq.querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>{if(dq.dataset.d)return;dq.dataset.d=1;const ok=b.dataset.k===q.ans;
+   dq.querySelectorAll('[data-k]').forEach(x=>{if(x.dataset.k===q.ans)x.classList.add('gm-ok')});if(!ok)b.classList.add('gm-no');
+   if(!done){const o=dGet(),y=new Date(Date.now()-864e5),yk=y.getFullYear()+'-'+String(y.getMonth()+1).padStart(2,'0')+'-'+String(y.getDate()).padStart(2,'0');dSet({last:dKey(),n:o.last===yk?(o.n||0)+1:(o.last===dKey()?o.n:1)})}
+   document.getElementById('dr').innerHTML='<div class="dq-res"><h3>'+(ok?'✅ إجابتك صحيحة! أحسنت':'❌ الإجابة الصحيحة: '+q.ans)+'</h3>'+q.sol.map(t=>'<p>'+t+'</p>').join('')+'</div><p class="sub">ارجع بكرة لسؤال جديد 🌟</p>';show()});
+  if(done)dq.insertAdjacentHTML('afterbegin','<p class="sub">حليت سؤال اليوم من قبل، بس بتقدر تحاول مرة ثانية للمراجعة.</p>')
+ }).catch(()=>{document.getElementById('dq').textContent='ما قدرت أحمّل سؤال اليوم. حاول لاحقاً.'})}
+
 function home(){
  document.title='منصة الرائد في الرياضيات';
  let s='<div class="hero"><div class="tx"><small>الأستاذ</small><h1>أنس القواسمة</h1><p>منصة الرائد في الرياضيات</p></div><div class="ph"><img src="assets/anas.webp" alt="الأستاذ أنس القواسمة"></div></div>'
- +'<form class="gsearch" id="hs"><input type="search" id="hq" placeholder="🔍 ابحث عن فيديو أو اختبار…"><button class="btn gold">بحث</button></form><div class="tools"><a href="#me"><span>📈</span>تقدّمي<small>نتائجي</small></a><a href="#wrong"><span>📕</span>دفتر أخطائي<small>راجع أخطاءك</small></a><a href="#mk"><span>🎲</span>اختبار مخصص<small>اختر وابدأ</small></a><a href="#fx"><span>📐</span>قوانين<small>مراجعة سريعة</small></a><a href="#game"><span>🎮</span>تحدّي السرعة<small>لعبة رياضيات</small></a></div>'
+ +'<form class="gsearch" id="hs"><input type="search" id="hq" placeholder="🔍 ابحث عن فيديو أو اختبار…"><button class="btn gold">بحث</button></form><div class="tools"><a href="#me"><span>📈</span>تقدّمي<small>نتائجي</small></a><a href="#wrong"><span>📕</span>دفتر أخطائي<small>راجع أخطاءك</small></a><a href="#mk"><span>🎲</span>اختبار مخصص<small>اختر وابدأ</small></a><a href="#fx"><span>📐</span>قوانين<small>مراجعة سريعة</small></a><a href="#game"><span>🎮</span>تحدّي السرعة<small>لعبة رياضيات</small></a><a href="#daily"><span>💡</span>سؤال اليوم<small>'+(dStreak()?'🔥 '+AR(dStreak())+' أيام':'سؤال جديد كل يوم')+'</small></a></div>'
  +'<h2 class="gh">📚 كتبي</h2><p class="sub">اختر كتابك لتدخل على وحداته.</p><div class="bk">';
  const card=(b,href,tst)=>{const I=ICON[b.key]||['','#fff'],G=GRADE[b.key];return '<a class="bc" style="--c:'+I[1]+'" href="'+href+'"><div class="im"><div class="bkart"><i>'+esc(G[0])+'</i><h4>'+esc(G[1])+'</h4><em>'+I[0]+'</em></div><img src="assets/book-'+b.key+'.jpg" alt="" onerror="this.remove()">'+(tst?'<u>📝</u>':'')+(b.videos.length?'':'<s class="soon">قريباً</s>')+'</div><b>'+(tst?'اختبارات ':'')+esc(G[0])+'</b><small>'+esc(G[1])+'</small></a>'};
  DATAV().forEach(b=>{s+=card(b,'#h-'+b.key,0)});
@@ -485,6 +507,7 @@ function render(){
  if(h==='wrong'){clearInterval(TM);return wrongPage()}
  if(h==='mk'){clearInterval(TM);return mkPage()}
  if(h==='fx'){clearInterval(TM);return fxPage()}
+ if(h==='daily'){clearInterval(TM);return dailyPage()}
  if(h==='game'){clearInterval(TM);return gamePage()}
  const sm=h.match(/^s-(.*)$/);if(sm){clearInterval(TM);return searchPage(sm[1])}
  clearInterval(TM);
