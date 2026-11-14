@@ -274,7 +274,7 @@ function dailyPage(){document.title='سؤال اليوم';
 function home(){
  document.title='منصة الرائد في الرياضيات';
  let s='<div class="hero"><div class="tx"><small>الأستاذ</small><h1>أنس القواسمة</h1><p>منصة الرائد في الرياضيات</p></div><div class="ph"><img src="assets/anas.webp" alt="الأستاذ أنس القواسمة"></div></div>'
- +'<form class="gsearch" id="hs"><input type="search" id="hq" placeholder="🔍 ابحث عن فيديو أو اختبار…"><button class="btn gold">بحث</button></form><div class="tools"><a href="#me"><span>📈</span>تقدّمي<small>نتائجي</small></a><a href="#wrong"><span>📕</span>دفتر أخطائي<small>راجع أخطاءك</small></a><a href="#mk"><span>🎲</span>اختبار مخصص<small>اختر وابدأ</small></a><a href="#fx"><span>📐</span>قوانين<small>مراجعة سريعة</small></a><a href="#game"><span>🎮</span>تحدّي السرعة<small>لعبة رياضيات</small></a><a href="#daily"><span>💡</span>سؤال اليوم<small>'+(dStreak()?'🔥 '+AR(dStreak())+' أيام':'سؤال جديد كل يوم')+'</small></a></div>'
+ +'<form class="gsearch" id="hs"><input type="search" id="hq" placeholder="🔍 ابحث عن فيديو أو اختبار…"><button class="btn gold">بحث</button></form><div class="tools"><a href="#me"><span>📈</span>تقدّمي<small>نتائجي</small></a><a href="#wrong"><span>📕</span>دفتر أخطائي<small>راجع أخطاءك</small></a><a href="#mk"><span>🎲</span>اختبار مخصص<small>اختر وابدأ</small></a><a href="#laws"><span>📏</span>قوانين مهمة<small>مساحات وحجوم وفيثاغورس</small></a><a href="#fx"><span>📐</span>قوانين ثانوي<small>مراجعة سريعة</small></a><a href="#game"><span>🎮</span>تحدّي السرعة<small>لعبة رياضيات</small></a><a href="#daily"><span>💡</span>سؤال اليوم<small>'+(dStreak()?'🔥 '+AR(dStreak())+' أيام':'سؤال جديد كل يوم')+'</small></a></div>'
  +'<h2 class="gh">📚 كتبي</h2><p class="sub">اختر كتابك لتدخل على وحداته.</p><div class="bk">';
  const card=(b,href,tst)=>{const I=ICON[b.key]||['','#fff'],G=GRADE[b.key];return '<a class="bc" style="--c:'+I[1]+'" href="'+href+'"><div class="im"><div class="bkart"><i>'+esc(G[0])+'</i><h4>'+esc(G[1])+'</h4><em>'+I[0]+'</em></div><img src="assets/book-'+b.key+'.jpg" alt="" onerror="this.remove()">'+(tst?'<u>📝</u>':'')+(b.videos.length?'':'<s class="soon">قريباً</s>')+'</div><b>'+(tst?'اختبارات ':'')+esc(G[0])+'</b><small>'+esc(G[1])+'</small></a>'};
  DATAV().forEach(b=>{s+=card(b,'#h-'+b.key,0)});
@@ -474,6 +474,16 @@ function mkPage(){
     const cq={id:'custom',unit:un,title:'اختبار مخصص — '+UNITS[bk].u[un-1][0],time:Math.ceil(P.length*1.2)+' دقيقة',total:P.length,questions:P};
     LS.set('cq',cq);ST={start:Date.now(),a:{},i:0,exam:document.getElementById('mx').checked};LS.set('qz-custom',ST);Q=cq;qrun();scrollTo(0,0)})}).catch(()=>{m.textContent='تعذّر التجهيز، حاول مرة ثانية.'})}
 }
+let LW=null;
+function lawsPage(sel){
+ document.title='قوانين مهمة';
+ const go=()=>{sel=sel||'all';
+  app.innerHTML='<div class="crumb"><a href="#">الرئيسية</a> ‹ قوانين مهمة</div><h1>📏 قوانين مهمة</h1><p class="sub">مساحات وحجوم، فيثاغورس، مسافات، وجبر.</p><div class="chips"><button class="chip'+(sel==='all'?' on':'')+'" data-s="all">الكل</button>'+LW.map((x,i)=>'<button class="chip'+(sel==i?' on':'')+'" data-s="'+i+'">'+esc(x.t)+'</button>').join('')+'</div>'
+  +LW.map((x,i)=>(sel==='all'||sel==i)?'<div class="sh">'+esc(x.t)+'</div>'+x.items.map(it=>'<div class="fxc"><h4>'+it.h+'</h4><div>'+it.f+'</div></div>').join(''):'').join('');
+  app.querySelectorAll('[data-s]').forEach(b=>b.onclick=()=>lawsPage(b.dataset.s))};
+ if(LW)return go();app.innerHTML='<div class="empty">جاري التحميل…</div>';
+ fetch('laws.json?v=1').then(r=>r.json()).then(j=>{LW=j;go()}).catch(()=>{app.innerHTML='<div class="empty">تعذّر التحميل، حاول مرة ثانية.</div>'});
+}
 let FX=null;
 function fxPage(sel){
  document.title='قوانين ومختصرات';
@@ -506,6 +516,7 @@ function render(){
  if(h==='me'){clearInterval(TM);return mePage()}
  if(h==='wrong'){clearInterval(TM);return wrongPage()}
  if(h==='mk'){clearInterval(TM);return mkPage()}
+ if(h==='laws'){clearInterval(TM);return lawsPage()}
  if(h==='fx'){clearInterval(TM);return fxPage()}
  if(h==='daily'){clearInterval(TM);return dailyPage()}
  if(h==='game'){clearInterval(TM);return gamePage()}
