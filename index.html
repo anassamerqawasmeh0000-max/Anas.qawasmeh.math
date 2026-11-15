@@ -165,7 +165,7 @@ footer{text-align:center;color:var(--mut);font-size:14px;padding:20px 16px 40px}
 <svg viewBox="0 0 32 32" aria-hidden="true"><path fill="#fff" d="M16 3C8.8 3 3 8.7 3 15.8c0 2.5.7 4.8 2 6.8L3 29l6.6-2c1.9 1 4 1.6 6.3 1.6 7.2 0 13-5.7 13-12.8S23.200 3 16 3z"/><path fill="#25d366" d="M16 5.200c-6 0-10.800 4.700-10.800 10.600 0 2.200.7 4.200 1.900 5.900l-1.200 4.200 4.300-1.300c1.700 1 3.700 1.600 5.800 1.600 6 0 10.800-4.700 10.800-10.500S22 5.200 16 5.200z"/><path fill="#fff" d="M12 10c-.3 0-.7.100-1 .5-.4.400-1.200 1.200-1.200 2.800s1.200 3.200 1.400 3.400c.2.200 2.400 3.800 5.900 5.200 2.900 1.100 3.500.9 4.100.8.600-.1 2-.8 2.300-1.600.3-.8.3-1.500.2-1.600-.1-.2-.4-.3-.8-.5s-2-1-2.300-1.100c-.3-.1-.6-.2-.8.200-.2.300-.9 1.100-1.100 1.300-.2.200-.4.300-.7.100-.4-.2-1.400-.5-2.700-1.600-1-.9-1.700-2-1.900-2.400-.2-.4 0-.6.200-.8.200-.2.400-.4.500-.6.200-.2.200-.4.400-.6.100-.2.100-.5 0-.7-.1-.2-.8-1.900-1.100-2.600-.3-.7-.6-.6-.8-.6z"/></svg>
 <span>تواصل عبر واتساب</span></a></div></div>
 <div style="margin-top:18px">شرح أسئلة الدوسية بالفيديو — الأستاذ أنس القواسمة</div></footer>
-<script type="module" src="app-fb.js?v=6"></script>
+<script type="module" src="app-fb.js?v=7"></script>
 <script>
 /* مواقع الفيديو الخارجية: ضع رابط مستودع الفيديوهات لكل صف، مثال: g8:'https://USER.github.io/videos-1/' (ينتهي بـ /). فارغ = من هذا الموقع */
 const VB={g8:'https://anassamerqawasmeh0000-max.github.io/videos-1/',g9:'https://anassamerqawasmeh0000-max.github.io/videos-1/'};
@@ -568,11 +568,12 @@ function ubar(){const b=document.getElementById('ub');if(!b)return;const s=FBS;
  b.innerHTML=(s.prof?'<span>👤 '+esc(s.prof.name)+'</span>':'')+(s.admin&&s.stage==='ok'?'<a href="#admin">🛠 المراقبة</a>':'')+'<a href="#" id="lo">خروج</a>';
  document.getElementById('lo').onclick=e=>{e.preventDefault();FB.logout()}}
 const STG={};Object.keys(GRADE).forEach(k=>STG[k]=k==='b2'?'ثاني ثانوي (أعمال)':k==='s3'?'ثاني ثانوي (علمي/أدبي)':GRADE[k][0]);
-const stgOpts=()=>'<select id="fs" required><option value="">اختر صفّك / مرحلتك</option>'+Object.keys(STG).map(k=>'<option value="'+k+'">'+STG[k]+'</option>').join('')+'</select>';
+const stgOpts=()=>'<input id="fs" placeholder="الصف (مثال: تاسع، أول ثانوي)" required maxlength="30">';
+const stgOk=s=>typeof s==='string'&&s.trim().length>0;
 function stagePick(){
  document.title='اختر صفّك';
  app.innerHTML='<div class="gate"><h1>🎓 في أي صف أنت؟</h1><p class="sub">اختار صفّك مرة وحدة عشان الأستاذ أنس يعرف من وين إنت.</p><form class="fm" id="sf">'+stgOpts()+'<div class="err" id="se"></div><button class="btn gold" id="sb">حفظ ومتابعة</button></form></div>';
- document.getElementById('sf').onsubmit=e=>{e.preventDefault();const v=document.getElementById('fs').value;if(!STG[v])return;const b=document.getElementById('sb');b.disabled=true;
+ document.getElementById('sf').onsubmit=e=>{e.preventDefault();const v=document.getElementById('fs').value.trim().slice(0,30);if(!v)return;const b=document.getElementById('sb');b.disabled=true;
   FB.setStage(FBS.user.uid,v).catch(x=>{SKIP=1;FBS=Object.assign({},FBS);const s=FBS;NS=false;if(s.stage==='ok')render();else gate(s)})}}
 function authForm(){
  const up=gm==='up';document.title='دخول';
@@ -586,7 +587,7 @@ function authForm(){
  const fg=document.getElementById('fg');if(fg)fg.onclick=e=>{e.preventDefault();const m=document.getElementById('fe').value.trim();if(!m){ae.textContent='اكتب الإيميل أولاً';return}FB.reset(m).then(()=>{ae.style.color='#7ee2b0';ae.textContent='أرسلنا رابط تغيير كلمة السر على إيميلك'}).catch(x=>{ae.textContent=errT(x)})};
  document.getElementById('af').onsubmit=e=>{e.preventDefault();const ab=document.getElementById('ab');ab.disabled=true;ae.style.color='';ae.textContent='';
   const em=document.getElementById('fe').value.trim(),pw=document.getElementById('fw').value;
-  const p=up?FB.signup(document.getElementById('fn').value.trim(),document.getElementById('fp').value.trim(),em,pw,document.getElementById('fs').value):FB.login(em,pw);
+  const p=up?FB.signup(document.getElementById('fn').value.trim(),document.getElementById('fp').value.trim(),em,pw,document.getElementById('fs').value.trim().slice(0,30)):FB.login(em,pw);
   p.catch(x=>{ab.disabled=false;ae.textContent=errT(x)})}}
 function gate(s){
  s=s||{stage:'loading'};document.title='منصة الرائد في الرياضيات';
@@ -609,7 +610,7 @@ async function syncDown(){
 let NS=false,SKIP=0;
 function bootApp(){
  const start=()=>FB.onState(s=>{const prev=FBS;FBS=s;UP=s.stage==='ok'?(s.user?'u'+s.user.uid.slice(0,12)+':':'g:'):'';ubar();
-  const ns=!!(s.user&&!s.admin&&s.prof&&!STG[s.prof.stage]&&(s.stage==='ok'||s.stage==='pending'));
+  const ns=!!(s.user&&!s.admin&&s.prof&&!stgOk(s.prof.stage)&&(s.stage==='ok'||s.stage==='pending'));
   if(ns&&!SKIP){NS=true;stagePick();return}
   const wasNS=NS;NS=false;
   if(s.stage==='ok'){if(wasNS||!prev||prev.stage!=='ok'||(prev.user&&prev.user.uid)!==(s.user&&s.user.uid))(s.user?syncDown():Promise.resolve()).then(render)}
@@ -631,7 +632,7 @@ async function adStudents(ad){
  const U=await FB.users(),ord={pending:0,approved:1,blocked:2};
  U.sort((a,b)=>((ord[a.status]??3)-(ord[b.status]??3))||((b.lastSeen||0)-(a.lastSeen||0)));
  const on=U.filter(u=>Date.now()-(u.lastSeen||0)<3*60000).length,pn=U.filter(u=>u.status==='pending'&&u.email!==FB.ADMIN).length;
- ad.innerHTML='<div class="stat"><div><b>'+AR(U.length-1<0?0:U.length-1)+'</b><small>طالب مسجّل</small></div><div><b>'+AR(pn)+'</b><small>بانتظار موافقتك</small></div><div><b>'+AR(on)+'</b><small>متصلين الآن</small></div></div><div class="ur"><div><b>🎓 توزيع الطلاب حسب الصف</b><small>'+Object.keys(STG).filter(k=>U.some(u=>u.email!==FB.ADMIN&&u.stage===k)).map(k=>STG[k]+': '+AR(U.filter(u=>u.email!==FB.ADMIN&&u.stage===k).length)).join(' · ')+' · غير محدد: '+AR(U.filter(u=>u.email!==FB.ADMIN&&!STG[u.stage]).length)+'</small></div></div>'
+ ad.innerHTML='<div class="stat"><div><b>'+AR(U.length-1<0?0:U.length-1)+'</b><small>طالب مسجّل</small></div><div><b>'+AR(pn)+'</b><small>بانتظار موافقتك</small></div><div><b>'+AR(on)+'</b><small>متصلين الآن</small></div></div><div class="ur"><div><b>🎓 توزيع الطلاب حسب الصف</b><small>'+(()=>{const c={};U.filter(u=>u.email!==FB.ADMIN&&stgOk(u.stage)).forEach(u=>{const k=u.stage.trim();c[k]=(c[k]||0)+1});return Object.keys(c).map(k=>esc(k)+': '+AR(c[k])).join(' · ')})()+' · غير محدد: '+AR(U.filter(u=>u.email!==FB.ADMIN&&!stgOk(u.stage)).length)+'</small></div></div>'
  +U.filter(u=>u.email!==FB.ADMIN).map(u=>{const st=u.status==='approved'?'<span class="pill g">مقبول</span>':u.status==='blocked'?'<span class="pill r">موقوف</span>':'<span class="pill y">بانتظار</span>';
   const GK=DATA.filter(b=>b.videos.length).map(b=>b.key),sel=Array.isArray(u.grades)&&u.grades.length?u.grades:GK;
   const chips='<div class="gch" data-gu="'+u.uid+'"><small>الصفوف المسموحة:</small>'+GK.map(k=>'<label class="gc'+(sel.includes(k)?' on':'')+'"><input type="checkbox" value="'+k+'"'+(sel.includes(k)?' checked':'')+'>'+esc(GRADE[k][0])+'</label>').join('')+'</div>';
