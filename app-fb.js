@@ -13,7 +13,9 @@ const emit=()=>subs.forEach(f=>{try{f(state)}catch(e){console.error(e)}});
 async function mkProfile(u){
   if(creating)return;creating=true;
   const p=pend||{};
-  try{await setDoc(doc(db,'users',u.uid),{name:(p.name||u.email.split('@')[0]).slice(0,60),phone:(p.phone||'').slice(0,20),email:u.email,...(p.stage?{stage:p.stage}:{}),status:'pending',createdAt:Date.now(),lastSeen:Date.now()})}
+  const base={name:(p.name||u.email.split('@')[0]).slice(0,60),phone:(p.phone||'').slice(0,20),email:u.email,status:'pending',createdAt:Date.now(),lastSeen:Date.now()};
+  try{try{await setDoc(doc(db,'users',u.uid),p.stage?Object.assign({stage:p.stage},base):base)}
+   catch(e){if(!p.stage)throw e;await setDoc(doc(db,'users',u.uid),base)}}
   catch(e){state={stage:'error',err:e};emit()}
   creating=false;
 }
