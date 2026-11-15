@@ -567,7 +567,7 @@ function ubar(){const b=document.getElementById('ub');if(!b)return;const s=FBS;
  if(!s||!s.user||s.stage==='loading'||s.stage==='out'){b.innerHTML='';return}
  b.innerHTML=(s.prof?'<span>👤 '+esc(s.prof.name)+'</span>':'')+(s.admin&&s.stage==='ok'?'<a href="#admin">🛠 المراقبة</a>':'')+'<a href="#" id="lo">خروج</a>';
  document.getElementById('lo').onclick=e=>{e.preventDefault();FB.logout()}}
-const STG={g8:'الصف الثامن',g9:'الصف التاسع',s1:'أول ثانوي',s2:'ثاني ثانوي'};
+const STG={};Object.keys(GRADE).forEach(k=>STG[k]=k==='b2'?'ثاني ثانوي (أعمال)':k==='s3'?'ثاني ثانوي (علمي/أدبي)':GRADE[k][0]);
 const stgOpts=()=>'<select id="fs" required><option value="">اختر صفّك / مرحلتك</option>'+Object.keys(STG).map(k=>'<option value="'+k+'">'+STG[k]+'</option>').join('')+'</select>';
 function stagePick(){
  document.title='اختر صفّك';
@@ -631,7 +631,7 @@ async function adStudents(ad){
  const U=await FB.users(),ord={pending:0,approved:1,blocked:2};
  U.sort((a,b)=>((ord[a.status]??3)-(ord[b.status]??3))||((b.lastSeen||0)-(a.lastSeen||0)));
  const on=U.filter(u=>Date.now()-(u.lastSeen||0)<3*60000).length,pn=U.filter(u=>u.status==='pending'&&u.email!==FB.ADMIN).length;
- ad.innerHTML='<div class="stat"><div><b>'+AR(U.length-1<0?0:U.length-1)+'</b><small>طالب مسجّل</small></div><div><b>'+AR(pn)+'</b><small>بانتظار موافقتك</small></div><div><b>'+AR(on)+'</b><small>متصلين الآن</small></div></div><div class="ur"><div><b>🎓 توزيع الطلاب حسب الصف</b><small>'+Object.keys(STG).map(k=>STG[k]+': '+AR(U.filter(u=>u.email!==FB.ADMIN&&u.stage===k).length)).join(' · ')+' · غير محدد: '+AR(U.filter(u=>u.email!==FB.ADMIN&&!STG[u.stage]).length)+'</small></div></div>'
+ ad.innerHTML='<div class="stat"><div><b>'+AR(U.length-1<0?0:U.length-1)+'</b><small>طالب مسجّل</small></div><div><b>'+AR(pn)+'</b><small>بانتظار موافقتك</small></div><div><b>'+AR(on)+'</b><small>متصلين الآن</small></div></div><div class="ur"><div><b>🎓 توزيع الطلاب حسب الصف</b><small>'+Object.keys(STG).filter(k=>U.some(u=>u.email!==FB.ADMIN&&u.stage===k)).map(k=>STG[k]+': '+AR(U.filter(u=>u.email!==FB.ADMIN&&u.stage===k).length)).join(' · ')+' · غير محدد: '+AR(U.filter(u=>u.email!==FB.ADMIN&&!STG[u.stage]).length)+'</small></div></div>'
  +U.filter(u=>u.email!==FB.ADMIN).map(u=>{const st=u.status==='approved'?'<span class="pill g">مقبول</span>':u.status==='blocked'?'<span class="pill r">موقوف</span>':'<span class="pill y">بانتظار</span>';
   const GK=DATA.filter(b=>b.videos.length).map(b=>b.key),sel=Array.isArray(u.grades)&&u.grades.length?u.grades:GK;
   const chips='<div class="gch" data-gu="'+u.uid+'"><small>الصفوف المسموحة:</small>'+GK.map(k=>'<label class="gc'+(sel.includes(k)?' on':'')+'"><input type="checkbox" value="'+k+'"'+(sel.includes(k)?' checked':'')+'>'+esc(GRADE[k][0])+'</label>').join('')+'</div>';
