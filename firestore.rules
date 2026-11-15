@@ -15,9 +15,11 @@ service cloud.firestore {
       allow read: if admin() || (signed() && request.auth.uid == uid);
       allow create: if signed() && request.auth.uid == uid
         && request.resource.data.status == 'pending'
-        && request.resource.data.keys().hasOnly(['name','phone','email','status','createdAt','lastSeen']);
+        && request.resource.data.keys().hasOnly(['name','phone','email','status','createdAt','lastSeen','stage'])
+        && (!('stage' in request.resource.data) || request.resource.data.stage in ['g8','g9','s1','s2']);
       allow update: if admin() || (signed() && request.auth.uid == uid
-        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['lastSeen']));
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['lastSeen','stage'])
+        && (!('stage' in request.resource.data) || request.resource.data.stage in ['g8','g9','s1','s2']));
       allow delete: if admin();
       match /kv/{k} {
         allow read, write: if admin() || (signed() && request.auth.uid == uid && approved());

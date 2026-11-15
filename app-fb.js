@@ -13,7 +13,7 @@ const emit=()=>subs.forEach(f=>{try{f(state)}catch(e){console.error(e)}});
 async function mkProfile(u){
   if(creating)return;creating=true;
   const p=pend||{};
-  try{await setDoc(doc(db,'users',u.uid),{name:(p.name||u.email.split('@')[0]).slice(0,60),phone:(p.phone||'').slice(0,20),email:u.email,status:'pending',createdAt:Date.now(),lastSeen:Date.now()})}
+  try{await setDoc(doc(db,'users',u.uid),{name:(p.name||u.email.split('@')[0]).slice(0,60),phone:(p.phone||'').slice(0,20),email:u.email,...(p.stage?{stage:p.stage}:{}),status:'pending',createdAt:Date.now(),lastSeen:Date.now()})}
   catch(e){state={stage:'error',err:e};emit()}
   creating=false;
 }
@@ -84,7 +84,7 @@ window.FB={
   ADMIN,
   get state(){return state},
   onState(f){subs.push(f);f(state)},
-  async signup(name,phone,email,pass){pend={name,phone};await createUserWithEmailAndPassword(auth,email,pass);
+  async signup(name,phone,email,pass,stage){pend={name,phone,stage};await createUserWithEmailAndPassword(auth,email,pass);
     if(email.toLowerCase()===ADMIN)await sendEmailVerification(auth.currentUser).catch(()=>{})},
   login:(e,p)=>signInWithEmailAndPassword(auth,e,p),
   logout:()=>signOut(auth),
@@ -95,6 +95,7 @@ window.FB={
   blob,putBlob,kvGet,kvSet,logAttempt,logView,
   users:async()=>(await getDocs(collection(db,'users'))).docs.map(d=>Object.assign({uid:d.id},d.data())),
   setStatus:(uid,s)=>updateDoc(doc(db,'users',uid),{status:s}),
+  setStage:(uid,s)=>updateDoc(doc(db,'users',uid),{stage:s}),
   setGrades:(uid,g)=>updateDoc(doc(db,'users',uid),{grades:g}),
   delUser:uid=>deleteDoc(doc(db,'users',uid)),
   atts:n=>rows('att',n),views:n=>rows('vw',n)
