@@ -539,7 +539,7 @@ function genPage(){
     const gn=GXG.find(x=>x[0]===GXS.g)[1],cq={id:'custom',gen:1,unit:1,title:'امتحان مولَّد — '+gn+' — نموذج '+seed,time:Math.ceil(P.length*1.5)+' دقيقة',total:P.length,questions:P};
     LS.set('cq',cq);ST={start:Date.now(),a:{},i:0,exam:document.getElementById('gxx').checked};LS.set('qz-custom',ST);Q=cq;qrun();scrollTo(0,0)}};
   draw()}).catch(()=>{const f=document.getElementById('gxf');if(f)f.innerHTML='<div class="sub">تعذّر التحميل، تأكد من الاتصال وحاول مرة ثانية.</div>'})}
-function graphPage2(){app.innerHTML='<div class="empty">جاري التحميل…</div>';loadJS('graph.js?v=1').then(()=>{window.graphPage(app)}).catch(()=>{app.innerHTML='<div class="empty">تعذّر التحميل، حاول مرة ثانية.</div>'})}
+function graphPage2(){app.innerHTML='<div class="empty">جاري التحميل…</div>';loadJS('graph.js?v=2').then(()=>{window.graphPage(app)}).catch(()=>{app.innerHTML='<div class="empty">تعذّر التحميل، حاول مرة ثانية.</div>'})}
 function mkPage(){
  document.title='اختبار مخصص';
  const u=[['s3','ثاني ثانوي متقدم'],['f3','أول ثانوي']];
