@@ -255,6 +255,70 @@ const dKey=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth(
 const dGet=()=>{try{return JSON.parse(localStorage.getItem('dstreak')||'{}')}catch(e){return {}}};
 const dSet=o=>{try{localStorage.setItem('dstreak',JSON.stringify(o))}catch(e){}};
 const dStreak=()=>{const o=dGet(),y=new Date(Date.now()-864e5),yk=y.getFullYear()+'-'+String(y.getMonth()+1).padStart(2,'0')+'-'+String(y.getDate()).padStart(2,'0');return (o.last===dKey()||o.last===yk)?(o.n||0):0};
+/* ----- نصائح الدراسة وجدولي ----- */
+const SD=['السبت','الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة'];
+const STIPS=[
+['🧠','قبل ما تبلّش','الرياضيات',[['🕐','ثابّت وقتك','اختار وقت يومي ثابت للرياضيات حتى لو ٤٥ دقيقة. الانتظام أقوى من ٥ ساعات مرة بالأسبوع.'],['📵','سكّر الجوال','حط الجوال بغرفة ثانية أو وضع الطيران. إشعار واحد بيهدم تركيزك ١٥ دقيقة.'],['📝','حضّر شغلاتك','ورقة، قلم، آلة حاسبة، وكتاب. ما تقوم من مكانك عشان تدوّر على شي.']]],
+['🎯','وقت الدراسة','طريقة صح',[['✍️','حل بإيدك، مش بعينك','ما تتفرج على الحل وتقول «فهمت». غطّي الحل وجرّب، وبعدين قارن. الرياضيات بتنحفظ بالقلم.'],['🔁','قاعدة ١-٣-٧','راجع الدرس بعد يوم، وبعد ٣ أيام، وبعد ٧ أيام. هيك بنزل بالذاكرة الطويلة.'],['📕','دفتر الأخطاء','سجّل كل سؤال غلطت فيه وليش غلطت. راجعه قبل الامتحان، فيه أغلى معلومات.'],['🗣️','اشرحها لحدا','اشرح الفكرة لأخوك أو لحالك بصوت عالي. اللي ما بقدر يشرحها، ما فهمها كاملة.'],['🧩','ابدأ بالسهل','حل ٢-٣ أسئلة سهلة يسخّنوا عقلك، وبعدين اهجم على الصعب.']]],
+['⏱️','توزيع الوقت','تنظيم',[['🍅','طريقة البومودورو','٢٥ دقيقة تركيز + ٥ دقائق راحة. بعد ٤ جولات، راحة ١٥-٢٠ دقيقة. جرّب المؤقّت اللي بتبويب «مؤقّت».'],['🌅','الصعب أول شي','المادة الصعبة بوقت نشاطك. غالباً الصبح أو بعد راحة.'],['⚖️','وازن المواد','خصص وقت أكثر للمادة اللي ضعيف فيها، بس لا تنسى باقي المواد.']]],
+['📚','قبل الامتحان بأسبوع','مراجعة',[['📄','حل امتحانات سابقة','بوقت حقيقي وبدون كتاب. هاد أقرب شي لجو الامتحان.'],['📋','ورقة القوانين','اكتب كل القوانين على ورقة واحدة وعلّقها قدام مكتبك.'],['❌','ركز على أخطائك','ارجع لدفتر الأخطاء، وحل أسئلة مشابهة لحد ما تصير سهلة.']]],
+['🌙','ليلة الامتحان','تهدئة',[['😴','نام ٧-٨ ساعات','النوم بثبّت اللي حفظته. السهر قبل الامتحان بيضيّع أكثر ما بنفع.'],['🥗','فطور خفيف وماي','ما تروح الامتحان جوعان أو متخم. المخ بحتاج سكر خفيف وماي.'],['🎒','جهّز شنطتك','قلم احتياط، آلة حاسبة، هوية. جهّزها من الليل.']]],
+['🏁','داخل الامتحان','استراتيجية',[['👀','اقرأ كل الورقة أول شي','٢ دقيقة تقرأ فيها كل الأسئلة. ابدأ بالسهل لتكسب ثقة ووقت.'],['🔍','راجع الإجابة','خصص آخر ٥-١٠ دقائق لتراجع الإشارات والأرقام والوحدات.'],['🧘','نفّس بعمق','إذا علقت بسؤال، انتقل لغيره وارجع له. ما تخلي سؤال يسرق وقتك.']]]];
+const SPK=['25/5','45/10','50/10'];
+const tfmt=m=>{m=((m%1440)+1440)%1440;const h=Math.floor(m/60),mm=m%60,p=h>=12?'م':'ص',h12=h%12||12;return AR(h12)+':'+AR(String(mm).padStart(2,'0'))+' '+p};
+const t2m=s=>{const a=(s||'0:0').split(':');return (+a[0])*60+(+a[1]||0)};
+const sGet=()=>{try{return JSON.parse(localStorage.getItem('studyplan')||'null')}catch(e){return null}},sSet=o=>{try{localStorage.setItem('studyplan',JSON.stringify(o))}catch(e){}};
+function mkPlan(c){
+ const days=c.days.slice(),w=c.subs.map(s=>s.d+(/رياض|math/i.test(s.n)?1:0)),cr=w.map(()=>0),tot=w.reduce((a,b)=>a+b,0);
+ const n=Math.max(0,Math.floor(((c.end-c.start)+c.brk)/(c.len+c.brk)));let last=-1;const out={};
+ days.forEach(d=>{out[d]=[];for(let i=0;i<n;i++){cr.forEach((_,k)=>cr[k]+=w[k]);let b=-1;cr.forEach((v,k)=>{if(k===last&&c.subs.length>1)return;if(b<0||v>cr[b])b=k});cr[b]-=tot;last=b;out[d].push({s:b,a:c.start+i*(c.len+c.brk),e:c.start+i*(c.len+c.brk)+c.len})}});
+ return out}
+function studyPage(tab){
+ tab=tab||'tips';document.title='نصائح الدراسة وجدولي';
+ const tabs=[['tips','💡 نصائح'],['plan','🗓 جدولي'],['tm','🍅 مؤقّت']];
+ app.innerHTML='<div class="crumb"><a href="#">الرئيسية</a> ‹ نصائح الدراسة</div><h1>📅 نصائح الدراسة وجدولي</h1><div class="chips">'+tabs.map(x=>'<button class="chip'+(tab===x[0]?' on':'')+'" data-t="'+x[0]+'">'+x[1]+'</button>').join('')+'</div><div id="sb"></div>';
+ app.querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>{clearInterval(TM);studyPage(b.dataset.t)});
+ const sb=document.getElementById('sb');
+ if(tab==='tips')return sTips(sb);if(tab==='plan')return sPlan(sb);return sTimer(sb)}
+function sTips(sb){
+ sb.innerHTML=STIPS.map(g=>'<div class="fxc"><h4>'+g[0]+' '+g[1]+' <small style="color:var(--mut);font-size:13px">· '+g[2]+'</small></h4>'+g[3].map(t=>'<div style="display:flex;gap:10px;margin:8px 0"><span style="font-size:24px">'+t[0]+'</span><div><b>'+t[1]+'</b><div style="color:var(--mut);font-size:14px;line-height:1.7">'+t[2]+'</div></div></div>').join('')+'</div>').join('')+'<p class="sub">جاهز تبني جدولك؟ افتح تبويب «🗓 جدولي».</p>'}
+function sTimer(sb){
+ let pr=SPK[0],run=0,left=0,mode='f',n=0,fo=25*60,br=5*60;
+ const draw=()=>{const m=Math.floor(left/60),s=left%60;document.getElementById('tc').textContent=AR(String(m).padStart(2,'0'))+':'+AR(String(s).padStart(2,'0'));document.getElementById('tl').textContent=(mode==='f'?'🎯 وقت تركيز':'☕ وقت راحة')+' · جولات مكتملة: '+AR(n)};
+ const setP=p=>{pr=p;const a=p.split('/');fo=+a[0]*60;br=+a[1]*60;mode='f';left=fo;run=0;clearInterval(TM);document.getElementById('tg').textContent='▶ ابدأ';draw()};
+ sb.innerHTML='<div class="fxc" style="text-align:center"><div class="chips" style="justify-content:center">'+SPK.map(p=>'<button class="chip" data-p="'+p+'">'+AR(p.split('/')[0])+' تركيز / '+AR(p.split('/')[1])+' راحة</button>').join('')+'</div><div id="tc" style="font-size:64px;font-weight:700;color:var(--gold);margin:14px 0" dir="ltr">٢٥:٠٠</div><div id="tl" class="sub"></div><div class="fm" style="margin-top:10px"><button class="btn gold" id="tg">▶ ابدأ</button><button class="btn" id="tr">إعادة</button></div></div><p class="sub">أثناء التركيز: الجوال بعيد، وكتاب وقلم قدامك بس. وبعد كل جولة اشرب ماي وتحرك شوي.</p>';
+ const beep=()=>{try{const c=new (window.AudioContext||window.webkitAudioContext)(),o=c.createOscillator();o.connect(c.destination);o.frequency.value=880;o.start();setTimeout(()=>{o.stop();c.close()},400)}catch(e){}if(navigator.vibrate)navigator.vibrate(300)};
+ sb.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>setP(b.dataset.p));
+ document.getElementById('tr').onclick=()=>setP(pr);
+ document.getElementById('tg').onclick=()=>{if(run){run=0;clearInterval(TM);document.getElementById('tg').textContent='▶ كمّل';return}run=1;document.getElementById('tg').textContent='⏸ إيقاف';clearInterval(TM);
+  TM=setInterval(()=>{left--;if(left<=0){beep();if(mode==='f'){n++;mode='b';left=br}else{mode='f';left=fo}}draw()},1000)};
+ setP(pr)}
+function sPlan(sb){
+ let P=sGet();
+ const form=c=>{c=c||{subs:[{n:'رياضيات',d:3},{n:'',d:2},{n:'',d:2}],days:[0,1,2,3,4,5],start:960,end:1200,len:45,brk:10};
+  const hh=m=>String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0');
+  sb.innerHTML='<form class="fm" id="pf"><p class="sub">اكتب موادك وصعوبة كل مادة (الرياضيات بتاخد وقت إضافي تلقائياً):</p>'+[0,1,2,3,4,5].map(i=>{const s=c.subs[i]||{n:'',d:2};return '<div style="display:flex;gap:8px"><input class="sn" placeholder="اسم المادة '+AR(i+1)+'" value="'+esc(s.n)+'" maxlength="25" style="flex:2"><select class="sd" style="flex:1"><option value="1"'+(s.d==1?' selected':'')+'>سهلة</option><option value="2"'+(s.d==2?' selected':'')+'>متوسطة</option><option value="3"'+(s.d==3?' selected':'')+'>صعبة</option></select></div>'}).join('')
+  +'<p class="sub">أيام الدراسة:</p><div class="chips">'+SD.map((d,i)=>'<label class="chip'+(c.days.includes(i)?' on':'')+'"><input type="checkbox" class="dy" value="'+i+'"'+(c.days.includes(i)?' checked':'')+' style="display:none">'+d+'</label>').join('')+'</div>'
+  +'<div style="display:flex;gap:8px"><label style="flex:1" class="sub">من<input type="time" id="ps" value="'+hh(c.start)+'"></label><label style="flex:1" class="sub">إلى<input type="time" id="pe" value="'+hh(c.end)+'"></label></div>'
+  +'<div style="display:flex;gap:8px"><label style="flex:1" class="sub">مدة الجلسة (دقيقة)<input type="number" id="pl" min="20" max="90" value="'+c.len+'"></label><label style="flex:1" class="sub">الراحة (دقيقة)<input type="number" id="pb" min="5" max="30" value="'+c.brk+'"></label></div>'
+  +'<label class="sub">تاريخ امتحان الرياضيات (اختياري)<input type="date" id="px" value="'+(c.exam||'')+'"></label><div class="err" id="pr"></div><button class="btn gold">🗓 ابنِ جدولي</button></form>';
+  sb.querySelectorAll('.dy').forEach(i=>i.onchange=()=>i.parentNode.classList.toggle('on',i.checked));
+  document.getElementById('pf').onsubmit=e=>{e.preventDefault();
+   const subs=[...sb.querySelectorAll('.sn')].map((x,i)=>({n:x.value.trim(),d:+sb.querySelectorAll('.sd')[i].value})).filter(s=>s.n),days=[...sb.querySelectorAll('.dy:checked')].map(x=>+x.value),
+    n={subs,days,start:t2m(document.getElementById('ps').value),end:t2m(document.getElementById('pe').value),len:+document.getElementById('pl').value||45,brk:+document.getElementById('pb').value||10,exam:document.getElementById('px').value,done:{}},er=document.getElementById('pr');
+   if(!subs.length||!days.length){er.textContent='اكتب مادة وحدة على الأقل واختار يوم';return}
+   if(n.end<=n.start+n.len){er.textContent='وقت النهاية لازم يكون بعد البداية بمدة جلسة على الأقل';return}
+   sSet(n);P=n;show()}};
+ const show=()=>{const pl=mkPlan(P),keys=Object.keys(pl);let tot=0,dn=0;keys.forEach(d=>pl[d].forEach((s,i)=>{tot++;if(P.done[d+'-'+i])dn++}));
+  let ex='';if(P.exam){const d=Math.ceil((new Date(P.exam)-Date.now())/864e5);ex=d>=0?'<div class="stat"><div><b>'+AR(d)+'</b><small>يوم على امتحان الرياضيات</small></div></div>':''}
+  sb.innerHTML=ex+'<div class="fxc"><b>✅ أنجزت '+AR(dn)+' من '+AR(tot)+' جلسة</b><div style="background:#0d1d3c;border-radius:8px;height:10px;margin-top:6px"><div style="width:'+(tot?Math.round(dn/tot*100):0)+'%;height:10px;border-radius:8px;background:var(--gold)"></div></div></div>'
+  +keys.sort((a,b)=>a-b).map(d=>'<div class="fxc"><h4>'+SD[d]+'</h4>'+pl[d].map((s,i)=>'<label style="display:flex;gap:10px;align-items:center;margin:6px 0"><input type="checkbox" data-k="'+d+'-'+i+'"'+(P.done[d+'-'+i]?' checked':'')+'><span dir="rtl"><b>'+esc(P.subs[s.s].n)+'</b> <small style="color:var(--mut)">'+tfmt(s.a)+' – '+tfmt(s.e)+'</small></span></label>').join('')+'</div>').join('')
+  +'<div class="fm"><button class="btn" id="pe2">✏️ عدّل الجدول</button><button class="btn red" id="pr2">🗑 جدول جديد</button></div><p class="sub">بين كل جلستين راحة '+AR(P.brk)+' دقيقة. استخدم تبويب «🍅 مؤقّت» أثناء الجلسة.</p>';
+  sb.querySelectorAll('[data-k]').forEach(c=>c.onchange=()=>{P.done[c.dataset.k]=c.checked?1:0;sSet(P);show()});
+  document.getElementById('pe2').onclick=()=>form(P);
+  document.getElementById('pr2').onclick=()=>{try{localStorage.removeItem('studyplan')}catch(e){}P=null;form()}};
+ P?show():form()}
+
 function dailyPage(){document.title='سؤال اليوم';
  app.innerHTML='<div class="crumb"><a href="#">الرئيسية</a> ‹ سؤال اليوم</div><h1>💡 سؤال اليوم</h1><div id="dq" class="empty">جاري التحميل…</div>';
  quizList().then(L=>{L=L.filter(q=>/^G[89]/.test(q.id));if(!L.length)throw 0;
@@ -274,7 +338,7 @@ function dailyPage(){document.title='سؤال اليوم';
 function home(){
  document.title='منصة الرائد في الرياضيات';
  let s='<div class="hero"><div class="tx"><small>الأستاذ</small><h1>أنس القواسمة</h1><p>منصة الرائد في الرياضيات</p></div><div class="ph"><img src="assets/anas.webp" alt="الأستاذ أنس القواسمة"></div></div>'
- +'<form class="gsearch" id="hs"><input type="search" id="hq" placeholder="🔍 ابحث عن فيديو أو اختبار…"><button class="btn gold">بحث</button></form><div class="tools"><a href="#me"><span>📈</span>تقدّمي<small>نتائجي</small></a><a href="#wrong"><span>📕</span>دفتر أخطائي<small>راجع أخطاءك</small></a><a href="#mk"><span>🎲</span>اختبار مخصص<small>اختر وابدأ</small></a><a href="#basics"><span>🧮</span>أساسيات الرياضيات<small>أعداد وكسور ونسب</small></a><a href="#laws"><span>📏</span>قوانين مهمة<small>مساحات وحجوم وفيثاغورس</small></a><a href="#fx"><span>📐</span>قوانين ثانوي<small>مراجعة سريعة</small></a><a href="#game"><span>🎮</span>تحدّي السرعة<small>لعبة رياضيات</small></a><a href="#daily"><span>💡</span>سؤال اليوم<small>'+(dStreak()?'🔥 '+AR(dStreak())+' أيام':'سؤال جديد كل يوم')+'</small></a></div>'
+ +'<form class="gsearch" id="hs"><input type="search" id="hq" placeholder="🔍 ابحث عن فيديو أو اختبار…"><button class="btn gold">بحث</button></form><div class="tools"><a href="#me"><span>📈</span>تقدّمي<small>نتائجي</small></a><a href="#wrong"><span>📕</span>دفتر أخطائي<small>راجع أخطاءك</small></a><a href="#mk"><span>🎲</span>اختبار مخصص<small>اختر وابدأ</small></a><a href="#basics"><span>🧮</span>أساسيات الرياضيات<small>أعداد وكسور ونسب</small></a><a href="#laws"><span>📏</span>قوانين مهمة<small>مساحات وحجوم وفيثاغورس</small></a><a href="#fx"><span>📐</span>قوانين ثانوي<small>مراجعة سريعة</small></a><a href="#study"><span>📅</span>نصائح الدراسة<small>جدولك ومؤقّت التركيز</small></a><a href="#game"><span>🎮</span>تحدّي السرعة<small>لعبة رياضيات</small></a><a href="#daily"><span>💡</span>سؤال اليوم<small>'+(dStreak()?'🔥 '+AR(dStreak())+' أيام':'سؤال جديد كل يوم')+'</small></a></div>'
  +'<h2 class="gh">📚 كتبي</h2><p class="sub">اختر كتابك لتدخل على وحداته.</p><div class="bk">';
  const card=(b,href,tst)=>{const I=ICON[b.key]||['','#fff'],G=GRADE[b.key];return '<a class="bc" style="--c:'+I[1]+'" href="'+href+'"><div class="im"><div class="bkart"><i>'+esc(G[0])+'</i><h4>'+esc(G[1])+'</h4><em>'+I[0]+'</em></div><img src="assets/book-'+b.key+'.jpg" alt="" onerror="this.remove()">'+(tst?'<u>📝</u>':'')+(b.videos.length?'':'<s class="soon">قريباً</s>')+'</div><b>'+(tst?'اختبارات ':'')+esc(G[0])+'</b><small>'+esc(G[1])+'</small></a>'};
  DATAV().forEach(b=>{s+=card(b,'#h-'+b.key,0)});
@@ -498,7 +562,7 @@ function basicsPage(sel){
    +S.filter(x=>sel==='all'||String(x.grp)===sel).map(x=>'<div class="sh">'+esc(x.t)+'</div>'+x.items.map(card).join('')).join('');
   app.innerHTML='<div class="crumb"><a href="#">الرئيسية</a> ‹ أساسيات الرياضيات</div><h1>🧮 أساسيات الرياضيات</h1><p class="sub">اختر المجموعة، وتصفّح الدروس بالأشكال.</p><input type="search" id="bq" class="bsearch" placeholder="🔍 ابحث (مثال: كسور، دائرة، احتمال)…" value="'+esc(BQ)+'">'
   +'<div class="bgrp">'+G.map((g,i)=>'<button class="bg'+(!q&&sel===String(i)?' on':'')+'" data-s="'+i+'"><span>'+g.ic+'</span>'+esc(g.t)+'<small>'+cnt(S.filter(x=>x.grp===i).length)+'</small></button>').join('')+'</div><div id="bbody">'+body+'</div>'
-  +'<div class="chips" style="margin-top:18px"><a class="chip" href="#laws">📏 قوانين مهمة</a><a class="chip" href="#game">🎮 تحدّي السرعة</a><a class="chip" href="#daily">💡 سؤال اليوم</a></div>';
+  +'<div class="chips" style="margin-top:18px"><a class="chip" href="#laws">📏 قوانين مهمة</a><a class="chip" href="#game">🎮 تحدّي السرعة</a><a class="chip" href="#daily">💡 سؤال اليوم</a><a class="chip" href="#study">📅 نصائح الدراسة</a></div>';
   app.querySelectorAll('[data-s]').forEach(b=>b.onclick=()=>{BQ='';basicsPage(b.dataset.s);window.scrollTo(0,0)});
   const bi=document.getElementById('bq');bi.oninput=()=>{BQ=bi.value;const p=bi.selectionStart;basicsPage(sel);const n=document.getElementById('bq');n.focus();n.setSelectionRange(p,p)}};
  if(BS)return go();app.innerHTML='<div class="empty">جاري التحميل…</div>';
@@ -539,6 +603,7 @@ function render(){
  if(h==='basics'){clearInterval(TM);return basicsPage()}
  if(h==='laws'){clearInterval(TM);return lawsPage()}
  if(h==='fx'){clearInterval(TM);return fxPage()}
+ if(h==='study'){clearInterval(TM);return studyPage()}
  if(h==='daily'){clearInterval(TM);return dailyPage()}
  if(h==='game'){clearInterval(TM);return gamePage()}
  const sm=h.match(/^s-(.*)$/);if(sm){clearInterval(TM);return searchPage(sm[1])}
