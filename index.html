@@ -338,7 +338,7 @@ function dailyPage(){document.title='سؤال اليوم';
 function home(){
  document.title='منصة الرائد في الرياضيات';
  let s='<div class="hero"><div class="tx"><small>الأستاذ</small><h1>أنس القواسمة</h1><p>منصة الرائد في الرياضيات</p></div><div class="ph"><img src="assets/anas.webp" alt="الأستاذ أنس القواسمة"></div></div>'
- +'<form class="gsearch" id="hs"><input type="search" id="hq" placeholder="🔍 ابحث عن فيديو أو اختبار…"><button class="btn gold">بحث</button></form><div class="tools"><a href="#me"><span>📈</span>تقدّمي<small>نتائجي</small></a><a href="#wrong"><span>📕</span>دفتر أخطائي<small>راجع أخطاءك</small></a><a href="#mk"><span>🎲</span>اختبار مخصص<small>اختر وابدأ</small></a><a href="#basics"><span>🧮</span>أساسيات الرياضيات<small>أعداد وكسور ونسب</small></a><a href="#laws"><span>📏</span>قوانين مهمة<small>مساحات وحجوم وفيثاغورس</small></a><a href="#fx"><span>📐</span>قوانين ثانوي<small>مراجعة سريعة</small></a><a href="#study"><span>📅</span>نصائح الدراسة<small>جدولك ومؤقّت التركيز</small></a><a href="#game"><span>🎮</span>تحدّي السرعة<small>لعبة رياضيات</small></a><a href="#daily"><span>💡</span>سؤال اليوم<small>'+(dStreak()?'🔥 '+AR(dStreak())+' أيام':'سؤال جديد كل يوم')+'</small></a></div>'
+ +'<form class="gsearch" id="hs"><input type="search" id="hq" placeholder="🔍 ابحث عن فيديو أو اختبار…"><button class="btn gold">بحث</button></form><div class="tools"><a href="#me"><span>📈</span>تقدّمي<small>نتائجي</small></a><a href="#wrong"><span>📕</span>دفتر أخطائي<small>راجع أخطاءك</small></a><a href="#mk"><span>🎲</span>اختبار مخصص<small>اختر وابدأ</small></a><a href="#basics"><span>🧮</span>أساسيات الرياضيات<small>أعداد وكسور ونسب</small></a><a href="#laws"><span>📏</span>قوانين مهمة<small>مساحات وحجوم وفيثاغورس</small></a><a href="#fx"><span>📐</span>قوانين ثانوي<small>مراجعة سريعة</small></a><a href="#gexam"><span>🧪</span>امتحان جديد كل مرة<small>أرقام مختلفة وحل خطوة خطوة</small></a><a href="#graph"><span>📈</span>رسم الاقتران<small>اكتب المعادلة وشوف الرسم</small></a><a href="#study"><span>📅</span>نصائح الدراسة<small>جدولك ومؤقّت التركيز</small></a><a href="#game"><span>🎮</span>تحدّي السرعة<small>لعبة رياضيات</small></a><a href="#daily"><span>💡</span>سؤال اليوم<small>'+(dStreak()?'🔥 '+AR(dStreak())+' أيام':'سؤال جديد كل يوم')+'</small></a></div>'
  +'<h2 class="gh">📚 كتبي</h2><p class="sub">اختر كتابك لتدخل على وحداته.</p><div class="bk">';
  const card=(b,href,tst)=>{const I=ICON[b.key]||['','#fff'],G=GRADE[b.key];return '<a class="bc" style="--c:'+I[1]+'" href="'+href+'"><div class="im"><div class="bkart"><i>'+esc(G[0])+'</i><h4>'+esc(G[1])+'</h4><em>'+I[0]+'</em></div><img src="assets/book-'+b.key+'.jpg" alt="" onerror="this.remove()">'+(tst?'<u>📝</u>':'')+(b.videos.length?'':'<s class="soon">قريباً</s>')+'</div><b>'+(tst?'اختبارات ':'')+esc(G[0])+'</b><small>'+esc(G[1])+'</small></a>'};
  DATAV().forEach(b=>{s+=card(b,'#h-'+b.key,0)});
@@ -484,7 +484,7 @@ function qresult(f){
 
 const qbk=id=>/^G9/.test(id)?'g9':/^G8/.test(id)?'g8':/^(U3|S)/.test(id)?'s3':'f3';
 const qbook=qbk;
-const qback=()=>Q.id==='custom'?'#mk':'#t-'+qbk(Q.id)+'-u'+(Q.unit||1);
+const qback=()=>Q.id==='custom'?(Q.gen?'#gexam':'#mk'):'#t-'+qbk(Q.id)+'-u'+(Q.unit||1);
 const pct=(a,b)=>b?Math.round(a/b*100):0;
 const dstr=t=>{try{return new Date(t).toLocaleDateString('ar-JO')}catch(e){return ''}};
 function histAdd(){const H=LS.get('hist')||[];H.push({id:Q.id,title:Q.title,score:ST.score,total:Q.total,t:Date.now(),exam:!!ST.exam});LS.set('hist',H.slice(-300));
@@ -516,6 +516,30 @@ function wrongPage(){
  const nx=document.getElementById('nx');if(nx)nx.onclick=()=>{const W2=LS.get('wrong')||{};if(W2[WI]&&W2[WI]._del)delete W2[WI];LS.set('wrong',W2);WI=null;WP=null;wrongPage();scrollTo(0,0)};
  const sk=document.getElementById('sk');if(sk)sk.onclick=()=>{WI=null;wrongPage()};
 }
+const loadJS=s=>{loadJS.c=loadJS.c||{};return loadJS.c[s]||(loadJS.c[s]=new Promise((ok,no)=>{const e=document.createElement('script');e.src=s;e.onload=ok;e.onerror=()=>{delete loadJS.c[s];no()};document.head.appendChild(e)}))};
+const GXG=[['g8','الصف الثامن'],['g9','الصف التاسع'],['f3','أول ثانوي']];
+let GXS={g:'g9',t:[]};
+function genPage(){
+ document.title='امتحان جديد كل مرة';
+ app.innerHTML='<div class="crumb"><a href="#">الرئيسية</a> › امتحان جديد كل مرة</div><h1>🧪 امتحان جديد كل مرة</h1><p class="sub">أسئلة بأرقام مختلفة كل مرة، فما في نموذجين متشابهين. بعد الحل بتشوف طريقة الحل خطوة خطوة، وأخطاؤك بتنحفظ بدفتر الأخطاء.</p><div class="qz-card mkf" id="gxf"><div class="sub">جاري التحميل…</div></div>';
+ Promise.all([loadJS('katex/katex.min.js'),loadJS('gen.js?v=1')]).then(()=>{
+  const f=document.getElementById('gxf');if(!f)return;
+  const draw=()=>{const tp=GEN.topics(GXS.g);
+   f.innerHTML='<label>الصف<select id="gxg">'+GXG.map(x=>'<option value="'+x[0]+'"'+(x[0]===GXS.g?' selected':'')+'>'+x[1]+'</option>').join('')+'</select></label>'
+   +'<div class="sub" style="margin:8px 0 4px">المواضيع (إذا ما اخترت شي بتجيك كل المواضيع):</div><div class="chips" id="gxt">'+tp.map(t=>'<button type="button" class="chip'+(GXS.t.includes(t.id)?' on':'')+'" data-t="'+t.id+'">'+esc(t.t)+'</button>').join('')+'</div>'
+   +'<label>عدد الأسئلة<select id="gxc"><option>10</option><option selected>20</option><option>30</option></select></label>'
+   +'<label>رقم النموذج<div style="display:flex;gap:8px"><input id="gxn" inputmode="numeric" value="'+(GXS.n||Math.floor(Math.random()*90000+10000))+'" style="flex:1;direction:ltr"><button type="button" class="btn" id="gxr">🎲 جديد</button></div></label>'
+   +'<label class="chk"><input type="checkbox" id="gxx"><span>وضع الامتحان: بدون رجوع للأسئلة السابقة</span></label><button class="btn gold" id="gxs">ابدأ الامتحان</button><div id="gxm" class="sub"></div>';
+   document.getElementById('gxg').onchange=e=>{GXS.g=e.target.value;GXS.t=[];draw()};
+   f.querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>{const i=GXS.t.indexOf(b.dataset.t);if(i<0)GXS.t.push(b.dataset.t);else GXS.t.splice(i,1);b.classList.toggle('on')});
+   document.getElementById('gxr').onclick=()=>{document.getElementById('gxn').value=Math.floor(Math.random()*90000+10000)};
+   document.getElementById('gxs').onclick=()=>{
+    const n=+document.getElementById('gxc').value,seed=Math.max(1,parseInt(document.getElementById('gxn').value)||1);GXS.n=seed;
+    const P=GEN.gen(GXS.g,GXS.t,n,seed);if(!P.length){document.getElementById('gxm').textContent='تعذّر تجهيز الامتحان، جرّب نموذج ثاني.';return}
+    const gn=GXG.find(x=>x[0]===GXS.g)[1],cq={id:'custom',gen:1,unit:1,title:'امتحان مولَّد — '+gn+' — نموذج '+seed,time:Math.ceil(P.length*1.5)+' دقيقة',total:P.length,questions:P};
+    LS.set('cq',cq);ST={start:Date.now(),a:{},i:0,exam:document.getElementById('gxx').checked};LS.set('qz-custom',ST);Q=cq;qrun();scrollTo(0,0)}};
+  draw()}).catch(()=>{const f=document.getElementById('gxf');if(f)f.innerHTML='<div class="sub">تعذّر التحميل، تأكد من الاتصال وحاول مرة ثانية.</div>'})}
+function graphPage2(){app.innerHTML='<div class="empty">جاري التحميل…</div>';loadJS('graph.js?v=1').then(()=>{window.graphPage(app)}).catch(()=>{app.innerHTML='<div class="empty">تعذّر التحميل، حاول مرة ثانية.</div>'})}
 function mkPage(){
  document.title='اختبار مخصص';
  const u=[['s3','ثاني ثانوي متقدم'],['f3','أول ثانوي']];
@@ -603,6 +627,8 @@ function render(){
  if(h==='basics'){clearInterval(TM);return basicsPage()}
  if(h==='laws'){clearInterval(TM);return lawsPage()}
  if(h==='fx'){clearInterval(TM);return fxPage()}
+ if(h==='gexam'){clearInterval(TM);return genPage()}
+ if(h==='graph'){clearInterval(TM);return graphPage2()}
  if(h==='study'){clearInterval(TM);return studyPage()}
  if(h==='daily'){clearInterval(TM);return dailyPage()}
  if(h==='game'){clearInterval(TM);return gamePage()}
