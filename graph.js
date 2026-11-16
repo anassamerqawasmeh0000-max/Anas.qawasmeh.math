@@ -1,11 +1,11 @@
 /* رسم الاقتران — حاسبة بيانية للطلاب */
 (function(){
-const FN={sin:Math.sin,cos:Math.cos,tan:Math.tan,asin:Math.asin,acos:Math.acos,atan:Math.atan,sqrt:Math.sqrt,abs:Math.abs,ln:Math.log,log:Math.log10,exp:Math.exp,floor:Math.floor,ceil:Math.ceil,sign:Math.sign,cbrt:Math.cbrt};
+const FN={sin:Math.sin,cos:Math.cos,tan:Math.tan,asin:Math.asin,acos:Math.acos,atan:Math.atan,sqrt:Math.sqrt,abs:Math.abs,ln:Math.log,log:Math.log10,exp:Math.exp,floor:Math.floor,ceil:Math.ceil,sign:Math.sign,cbrt:Math.cbrt,sinh:Math.sinh,cosh:Math.cosh,tanh:Math.tanh,cot:x=>1/Math.tan(x),sec:x=>1/Math.cos(x),csc:x=>1/Math.sin(x)};
 const PARAMS='abcdkm'.split('');
 function norm(s){return String(s).replace(/[٠-٩]/g,d=>'٠١٢٣٤٥٦٧٨٩'.indexOf(d)).replace(/[−–]/g,'-').replace(/[×·]/g,'*').replace(/÷/g,'/').replace(/،/g,',').replace(/^\s*[yf]\s*(\(\s*x\s*\))?\s*=/i,'').replace(/√/g,'sqrt').replace(/π/g,'pi').replace(/²/g,'^2').replace(/³/g,'^3')}
 function tok(s){const t=[];let i=0;s=norm(s).toLowerCase();while(i<s.length){const c=s[i];if(/\s/.test(c)){i++;continue}
  if(/[0-9.]/.test(c)){let j=i;while(j<s.length&&/[0-9.]/.test(s[j]))j++;const v=parseFloat(s.slice(i,j));if(isNaN(v))throw new Error('رقم غير صحيح');t.push({t:'n',v});i=j;continue}
- if(/[a-z]/.test(c)){let m=null;for(const k of Object.keys(FN).concat(['pi'])){if(s.startsWith(k,i)&&(!m||k.length>m.length))m=k}
+ if(/[a-z]/.test(c)){let m=null;for(const k of Object.keys(FN).concat(['pi','deriv','integ'])){if(s.startsWith(k,i)&&(!m||k.length>m.length))m=k}
   if(m){t.push(m==='pi'?{t:'n',v:Math.PI}:{t:'f',v:m});i+=m.length;continue}
   if(c==='e'){t.push({t:'n',v:Math.E});i++;continue}
   if(c==='x'||PARAMS.includes(c)){t.push({t:'v',v:c});i++;continue}
@@ -23,31 +23,57 @@ function compile(src){const t=tok(src),used=new Set();let p=0;const pk=()=>t[p],
  function at(){const k=nx();if(!k)throw new Error('المعادلة ناقصة');
   if(k.t==='n'){const v=k.v;return()=>v}
   if(k.t==='v'){used.add(k.v);const v=k.v;return v==='x'?(x)=>x:(x,P)=>P[v]}
-  if(k.t==='f'){const f=FN[k.v];let a;if(isO('(')){nx();a=ex();if(!isO(')'))throw new Error('نقص قوس )');nx()}else a=pw();return(x,P)=>f(a(x,P))}
-  if(k.t==='o'&&k.v==='('){const a=ex();if(!isO(')'))throw new Error('نقص قوس )');nx();return a}
+  if(k.t==='f'){const f=FN[k.v];let a;if(isO('(')){nx();a=ex();if(isO(')'))nx();else if(p<t.length)throw new Error('نقص قوس )')}else a=pw();
+   if(k.v==='deriv')return(x,P)=>{const h=1e-4*Math.max(1,Math.abs(x));return(a(x+h,P)-a(x-h,P))/(2*h)};
+   if(k.v==='integ')return(x,P)=>{const n=40,h=x/n;let sm=a(0,P)+a(x,P);for(let i=1;i<n;i++)sm+=(i%2?4:2)*a(i*h,P);return sm*h/3};
+   return(x,P)=>f(a(x,P))}
+  if(k.t==='o'&&k.v==='('){const a=ex();if(isO(')'))nx();else if(p<t.length)throw new Error('نقص قوس )');return a}
   throw new Error('رمز في غير مكانه: '+k.v)}
  const f=ex();if(p<t.length)throw new Error('رمز زائد: '+t[p].v);return{f,used}}
 const fmt=v=>{if(!Number.isFinite(v))return '—';const r=Math.round(v*1000)/1000;return String(Object.is(r,-0)?0:r)};
 const COL=['#4aa3ff','#f6d77a','#ff8a7a'];
-const PRE=[['y=x','x'],['خطي 2x+1','2x+1'],['x²','x^2'],['ax²+bx+c','a*x^2+b*x+c'],['√x','sqrt(x)'],['1/x','1/x'],['|x|','abs(x)'],['sin x','sin(x)'],['x³−3x','x^3-3*x'],['ax+b','a*x+b']];
+const PRE=[['y=x','x'],['2x+1','2x+1'],['x²','x^2'],['ax²+bx+c','a*x^2+b*x+c'],['√x','sqrt(x)'],['1/x','1/x'],['|x|','abs(x)'],['sin x','sin(x)'],['x³−3x','x^3-3*x'],['ax+b','a*x+b']];
 function css(){if(document.getElementById('grcss'))return;const s=document.createElement('style');s.id='grcss';s.textContent=`.gr-cv{width:100%;height:340px;display:block;background:#0c1b38;border:1px solid var(--line);border-radius:14px;touch-action:none;cursor:grab}
 .gr-row{display:flex;gap:8px;align-items:center;margin:8px 0}.gr-row input[type=text]{flex:1;min-width:0;direction:ltr;text-align:left;font-size:18px}.gr-dot{width:14px;height:14px;border-radius:50%;flex:none}
-.gr-q{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}.gr-q button{min-width:38px;padding:6px 8px;font-size:15px}
+.gr-kb{background:#0c1b38;border:1px solid var(--line);border-radius:14px;padding:8px;margin:8px 0;direction:ltr;user-select:none;-webkit-user-select:none}
+.gr-kc,.gr-kt{display:grid;gap:6px;margin-bottom:8px}.gr-kc{grid-template-columns:repeat(5,minmax(0,1fr))}.gr-kt{grid-template-columns:repeat(4,minmax(0,1fr))}
+.gr-kg{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px}
+.gr-kb button{font:600 17px Cairo,sans-serif;padding:11px 0;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--fg);cursor:pointer;touch-action:manipulation;min-width:0;white-space:nowrap;overflow:hidden}
+.gr-kb button:active{filter:brightness(1.4)}.gr-kc button{background:none;border-color:transparent;font-size:19px}.gr-kt button{font-size:13px;border-radius:20px;padding:7px 0;color:var(--mut)}.gr-kt button.on{background:var(--gold);color:#0a1630;border-color:var(--gold)}
+.gr-kg .n{background:#1a3566;font-size:19px}.gr-kg .o{background:#1c3a6e;color:var(--gold)}.gr-kg .f{font-size:15px;color:#bcd0f5;background:#0d1d3c}.gr-kg .w{grid-column:span 3}
 .gr-sl{display:flex;align-items:center;gap:8px;margin:6px 0}.gr-sl b{min-width:44px;direction:ltr;text-align:left}.gr-sl input{flex:1;min-width:0}
 .gr-info{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin:8px 0;font-size:15px;line-height:1.9}.gr-info b{color:var(--gold)}.gr-info .v{direction:ltr;unicode-bidi:isolate;display:inline-block}
 .gr-ct{display:flex;gap:8px;margin:8px 0}.gr-tb{border-collapse:collapse;width:100%;direction:ltr;text-align:center;font-size:14px}.gr-tb td,.gr-tb th{border:1px solid var(--line);padding:4px}.gr-err{color:#ff8f8f;font-size:14px;min-height:18px}`;document.head.appendChild(s)}
 window.graphPage=function(app){
  css();document.title='رسم الاقتران';
  const st={fns:[{s:'a*x^2+b*x+c',on:1},{s:'',on:1},{s:'',on:1}],P:{a:1,b:0,c:0,d:1,k:1,m:1},v:{cx:0,cy:0,sc:40},foc:0};
- app.innerHTML='<div class="crumb"><a href="#">الرئيسية</a> ‹ رسم الاقتران</div><h1>📈 رسم الاقتران</h1><p class="sub">اكتب الاقتران وشوف رسمه فورًا. اسحب الرسم للتحريك وكبّر بإصبعين. إذا استخدمت الحروف a وb وc بتطلع لك مقابض تحرّكها.</p>'
- +'<div class="chips" id="grp"></div><div id="grr"></div><div class="gr-q" id="grk"></div><div class="gr-err" id="gre"></div><canvas class="gr-cv" id="grc"></canvas>'
+ app.innerHTML='<div class="crumb"><a href="#">الرئيسية</a> ‹ رسم الاقتران</div><h1>📈 رسم الاقتران</h1><p class="sub">اكتب الاقتران من لوحة المفاتيح الرياضية تحت وشوف رسمه فورًا. اسحب الرسم للتحريك وكبّر بإصبعين. الحروف a وb وc بتطلع لها مقابض تحرّكها. وزر abc بيفتح كيبورد الجوال العادي.</p>'
+ +'<div class="chips" id="grp"></div><div id="grr"></div><div class="gr-kb" id="grk"></div><div class="gr-err" id="gre"></div><canvas class="gr-cv" id="grc"></canvas>'
  +'<div class="gr-ct"><button class="btn" id="gz1">＋ تكبير</button><button class="btn" id="gz2">－ تصغير</button><button class="btn" id="gz0">⟲ رجوع</button></div><div id="grs"></div><div id="gri"></div>';
  const cv=document.getElementById('grc'),ctx=cv.getContext('2d');let W=0,H=0,dpr=1;
  const rowsEl=document.getElementById('grr');
  rowsEl.innerHTML=st.fns.map((f,i)=>'<div class="gr-row"><span class="gr-dot" style="background:'+COL[i]+'"></span><span class="sub" style="margin:0" dir="ltr">y=</span><input type="text" data-i="'+i+'" value="'+f.s+'" placeholder="'+(i?'اقتران إضافي (اختياري)':'مثال: x^2-4')+'" autocapitalize="off" autocomplete="off" spellcheck="false"></div>').join('');
  const inps=[...rowsEl.querySelectorAll('input')];
- document.getElementById('grp').innerHTML=PRE.map((p,i)=>'<button class="chip" data-p="'+i+'">'+p[0]+'</button>').join('');
- document.getElementById('grk').innerHTML=['x','^','(',')','+','-','*','/','sqrt(','abs(','sin(','cos(','pi'].map(k=>'<button class="btn" dir="ltr" data-k="'+k+'">'+(k==='*'?'×':k==='/'?'÷':k)+'</button>').join('');
+ document.getElementById('grp').innerHTML=PRE.map((p,i)=>'<button class="chip" dir="ltr" data-p="'+i+'">'+p[0]+'</button>').join('');
+ const KT=[['123','+ − × ÷'],['fx','f(x) log'],['tr','sin cos'],['dx','d/dx ∫']];
+ const KB={'123':[['(','(','f'],[')',')','f'],['7','7','n'],['8','8','n'],['9','9','n'],['÷','/','o'],['x','x','f'],['xʸ','^','f'],['4','4','n'],['5','5','n'],['6','6','n'],['×','*','o'],['x²','^2','f'],['√','sqrt(','f'],['1','1','n'],['2','2','n'],['3','3','n'],['−','-','o'],['π','pi','f'],['|x|','abs(','f'],['0','0','n'],['.','.','n'],['e','e','f'],['+','+','o']],
+  fx:[['log','log(','f'],['ln','ln(','f'],['eˣ','e^(','f'],['10ˣ','10^(','f'],['xʸ','^(','f'],['1/x','1/(','f'],['√','sqrt(','f'],['∛','cbrt(','f'],['|x|','abs(','f'],['x²','^2','f'],['x³','^3','f'],['x','x','f'],['a','a','o'],['b','b','o'],['c','c','o'],['d','d','o'],['k','k','o'],['m','m','o'],['(','(','f'],[')',')','f'],['floor','floor(','f'],['ceil','ceil(','f'],['sign','sign(','f'],['π','pi','f']],
+  tr:[['sin','sin(','f'],['cos','cos(','f'],['tan','tan(','f'],['cot','cot(','f'],['sec','sec(','f'],['csc','csc(','f'],['sin⁻¹','asin(','f'],['cos⁻¹','acos(','f'],['tan⁻¹','atan(','f'],['sinh','sinh(','f'],['cosh','cosh(','f'],['tanh','tanh(','f'],['π','pi','o'],['π/2','pi/2','o'],['2π','2pi','o'],['x','x','f'],['(','(','f'],[')',')','f']],
+  dx:[['d/dx  المشتقة','deriv(','f w'],['∫₀ˣ  التكامل','integ(','f w'],['x','x','f'],['x²','^2','f'],['xʸ','^(','f'],['(','(','f'],[')',')','f'],['√','sqrt(','f'],['sin','sin(','f'],['cos','cos(','f'],['ln','ln(','f'],['eˣ','e^(','f'],['+','+','o'],['−','-','o']]};
+ let ktab='123',sysKb=false;const kbEl=document.getElementById('grk');
+ function kbDraw(){kbEl.innerHTML='<div class="gr-kc"><button data-c="abc">'+(sysKb?'⌨ 123':'abc')+'</button><button data-c="clr" title="مسح">⟲</button><button data-c="l">←</button><button data-c="r">→</button><button data-c="bk">⌫</button></div>'
+  +(sysKb?'':'<div class="gr-kt">'+KT.map(t=>'<button data-tb="'+t[0]+'" class="'+(t[0]===ktab?'on':'')+'">'+t[1]+'</button>').join('')+'</div><div class="gr-kg">'+KB[ktab].map(k=>'<button class="'+k[2]+'" data-k="'+k[1]+'">'+k[0]+'</button>').join('')+'</div>');
+  kbEl.querySelectorAll('button').forEach(b=>{b.addEventListener('pointerdown',e=>e.preventDefault());b.onclick=()=>kbPress(b)})}
+ const TOK=/(deriv\(|integ\(|asin\(|acos\(|atan\(|sinh\(|cosh\(|tanh\(|sqrt\(|cbrt\(|floor\(|ceil\(|sign\(|sin\(|cos\(|tan\(|cot\(|sec\(|csc\(|log\(|abs\(|ln\(|pi|.)$/;
+ function kbPress(b){const i=inps[st.foc]||inps[0];let s=i.selectionStart==null?i.value.length:i.selectionStart,e=i.selectionEnd==null?s:i.selectionEnd;
+  const set=(v,p)=>{i.value=v;if(!sysKb&&document.activeElement!==i)i.focus({preventScroll:true});try{i.setSelectionRange(p,p)}catch(x){}redraw()};
+  if(b.dataset.tb){ktab=b.dataset.tb;kbDraw();return}
+  const c=b.dataset.c;
+  if(c==='abc'){sysKb=!sysKb;inps.forEach(x=>x.setAttribute('inputmode',sysKb?'text':'none'));kbDraw();i.blur();if(sysKb)setTimeout(()=>i.focus(),60);return}
+  if(c==='clr'){set('',0);return}
+  if(c==='l'||c==='r'){const p=Math.max(0,Math.min(i.value.length,s+(c==='l'?-1:1)));i.focus({preventScroll:true});try{i.setSelectionRange(p,p)}catch(x){}return}
+  if(c==='bk'){if(s!==e){set(i.value.slice(0,s)+i.value.slice(e),s);return}const m=i.value.slice(0,s).match(TOK);if(!m)return;set(i.value.slice(0,s-m[0].length)+i.value.slice(e),s-m[0].length);return}
+  const k=b.dataset.k;set(i.value.slice(0,s)+k+i.value.slice(e),s+k.length)}
  const getFns=()=>{const err=[];const out=st.fns.map((f,i)=>{f.c=null;const s=inps[i].value.trim();f.s=s;if(!s)return f;try{f.c=compile(s)}catch(e){err.push('المعادلة '+(i+1)+': '+e.message)}return f});document.getElementById('gre').textContent=err.join(' · ');return out};
  const ev=(f,x)=>{try{const v=f.c.f(x,st.P);return Number.isFinite(v)?v:NaN}catch(e){return NaN}};
  function size(){dpr=window.devicePixelRatio||1;W=cv.clientWidth;H=cv.clientHeight;cv.width=W*dpr;cv.height=H*dpr;ctx.setTransform(dpr,0,0,dpr,0,0)}
@@ -91,7 +117,7 @@ window.graphPage=function(app){
  function redraw(keep){if(!keep){getFns();sliders()}analyse();draw();info()}
  inps.forEach(i=>{i.oninput=()=>redraw();i.onfocus=()=>{st.foc=+i.dataset.i}});
  document.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>{inps[0].value=PRE[+b.dataset.p][1];inps[1].value='';inps[2].value='';redraw()});
- document.querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>{const i=inps[st.foc]||inps[0],k=b.dataset.k,s=i.selectionStart==null?i.value.length:i.selectionStart,e=i.selectionEnd==null?s:i.selectionEnd;i.value=i.value.slice(0,s)+k+i.value.slice(e);i.focus();const p=s+k.length;try{i.setSelectionRange(p,p)}catch(x){}redraw()});
+ inps.forEach(x=>x.setAttribute('inputmode','none'));kbDraw();
  const zoom=(f,px,py)=>{px=px==null?W/2:px;py=py==null?H/2:py;const bx=ix(px),by=iy(py);st.v.sc=Math.min(2000,Math.max(2,st.v.sc*f));st.v.cx=bx-(px-W/2)/st.v.sc;st.v.cy=by+(py-H/2)/st.v.sc;redraw(1)};
  document.getElementById('gz1').onclick=()=>zoom(1.4);document.getElementById('gz2').onclick=()=>zoom(1/1.4);document.getElementById('gz0').onclick=()=>{st.v={cx:0,cy:0,sc:40};redraw(1)};
  const ptr=new Map();let pd=0;
