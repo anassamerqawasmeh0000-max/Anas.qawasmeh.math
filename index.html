@@ -343,7 +343,7 @@ function dailyPage(){document.title='سؤال اليوم';
 function home(){
  document.title='منصة الرائد في الرياضيات';
  let s='<div class="hero"><div class="tx"><small>الأستاذ</small><h1>أنس القواسمة</h1><p>منصة الرائد في الرياضيات</p></div><div class="ph"><img src="assets/anas.webp" alt="الأستاذ أنس القواسمة"></div></div>'
- +'<form class="gsearch" id="hs"><input type="search" id="hq" placeholder="🔍 ابحث عن فيديو أو اختبار…"><button class="btn gold">بحث</button></form><div class="tools"><a href="#me"><span>📈</span>تقدّمي<small>نتائجي</small></a><a href="#wrong"><span>📕</span>دفتر أخطائي<small>راجع أخطاءك</small></a><a href="#mk"><span>🎲</span>اختبار مخصص<small>اختر وابدأ</small></a><a href="#basics"><span>🧮</span>أساسيات الرياضيات<small>أعداد وكسور ونسب</small></a><a href="#laws"><span>📏</span>قوانين مهمة<small>مساحات وحجوم وفيثاغورس</small></a><a href="#fx"><span>📐</span>قوانين ثانوي<small>مراجعة سريعة</small></a><a href="#gexam"><span>🧪</span>امتحان جديد كل مرة<small>أرقام مختلفة وحل خطوة خطوة</small></a><a href="#graph"><span>📈</span>رسم الاقتران<small>اكتب المعادلة وشوف الرسم</small></a><a href="#study"><span>📅</span>نصائح الدراسة<small>جدولك ومؤقّت التركيز</small></a><a href="#game"><span>🎮</span>تحدّي السرعة<small>لعبة رياضيات</small></a><a href="#daily"><span>💡</span>سؤال اليوم<small>'+(dStreak()?'🔥 '+AR(dStreak())+' أيام':'سؤال جديد كل يوم')+'</small></a></div>'
+ +'<form class="gsearch" id="hs"><input type="search" id="hq" placeholder="🔍 ابحث عن فيديو أو اختبار…"><button class="btn gold">بحث</button></form><div class="tools"><a href="#me"><span>📈</span>تقدّمي<small>نتائجي</small></a><a href="#wrong"><span>📕</span>دفتر أخطائي<small>راجع أخطاءك</small></a><a href="#mk"><span>🎲</span>اختبار مخصص<small>اختر وابدأ</small></a><a href="#basics"><span>🧮</span>أساسيات الرياضيات<small>أعداد وكسور ونسب</small></a><a href="#laws"><span>📏</span>قوانين مهمة<small>مساحات وحجوم وفيثاغورس</small></a><a href="#fx"><span>📐</span>قوانين ثانوي<small>مراجعة سريعة</small></a><a href="#gexam"><span>🧪</span>امتحان جديد كل مرة<small>أرقام مختلفة وحل خطوة خطوة</small></a><a href="#calc"><span>🔢</span>الحاسبة العلمية<small>جذور ومثلثات ولوغاريتمات</small></a><a href="#graph"><span>📈</span>رسم الاقتران<small>اكتب المعادلة وشوف الرسم</small></a><a href="#study"><span>📅</span>نصائح الدراسة<small>جدولك ومؤقّت التركيز</small></a><a href="#game"><span>🎮</span>تحدّي السرعة<small>لعبة رياضيات</small></a><a href="#daily"><span>💡</span>سؤال اليوم<small>'+(dStreak()?'🔥 '+AR(dStreak())+' أيام':'سؤال جديد كل يوم')+'</small></a></div>'
  +'<h2 class="gh">📚 كتبي</h2><p class="sub">اختر كتابك لتدخل على وحداته.</p><div class="bk">';
  const card=(b,href,tst)=>{const I=ICON[b.key]||['','#fff'],G=GRADE[b.key];return '<a class="bc" style="--c:'+I[1]+'" href="'+href+'"><div class="im"><div class="bkart"><i>'+esc(G[0])+'</i><h4>'+esc(G[1])+'</h4><em>'+I[0]+'</em></div><img src="assets/book-'+b.key+'.jpg" alt="" onerror="this.remove()">'+(tst?'<u>📝</u>':'')+(b.videos.length?'':'<s class="soon">قريباً</s>')+'</div><b>'+(tst?'اختبارات ':'')+esc(G[0])+'</b><small>'+esc(G[1])+'</small></a>'};
  DATAV().forEach(b=>{s+=card(b,'#h-'+b.key,0)});
@@ -546,6 +546,7 @@ function genPage(){
     const gn=GXG.find(x=>x[0]===GXS.g)[1],cq={id:'custom',gen:1,unit:1,title:'امتحان مولَّد — '+gn+' — نموذج '+seed,time:Math.ceil(P.length*1.5)+' دقيقة',total:P.length,questions:P};
     LS.set('cq',cq);ST={start:Date.now(),a:{},i:0,exam:document.getElementById('gxx').checked};LS.set('qz-custom',ST);Q=cq;qrun();scrollTo(0,0)}};
   draw()}).catch(()=>{const f=document.getElementById('gxf');if(f)f.innerHTML='<div class="sub">تعذّر التحميل، تأكد من الاتصال وحاول مرة ثانية.</div>'})}
+function calcPage2(){app.innerHTML='<div class="empty">جاري التحميل…</div>';loadJS('calc.js?v=1').then(()=>{window.calcPage(app)}).catch(()=>{app.innerHTML='<div class="empty">تعذّر التحميل، حاول مرة ثانية.</div>'})}
 function graphPage2(){app.innerHTML='<div class="empty">جاري التحميل…</div>';loadJS('graph.js?v=2').then(()=>{window.graphPage(app)}).catch(()=>{app.innerHTML='<div class="empty">تعذّر التحميل، حاول مرة ثانية.</div>'})}
 function mkPage(){
  document.title='اختبار مخصص';
@@ -635,6 +636,7 @@ function render(){
  if(h==='laws'){clearInterval(TM);return lawsPage()}
  if(h==='fx'){clearInterval(TM);return fxPage()}
  if(h==='gexam'){clearInterval(TM);return genPage()}
+ if(h==='calc'){clearInterval(TM);return calcPage2()}
  if(h==='graph'){clearInterval(TM);return graphPage2()}
  if(h==='study'){clearInterval(TM);return studyPage()}
  if(h==='daily'){clearInterval(TM);return dailyPage()}
