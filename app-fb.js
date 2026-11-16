@@ -93,6 +93,7 @@ window.FB={
   reset:e=>sendPasswordResetEmail(auth,e),
   resend:()=>sendEmailVerification(auth.currentUser),
   async recheck(){const u=auth.currentUser;if(!u)return;await u.reload();await u.getIdToken(true);handle(auth.currentUser)},
+  token:async()=>{const u=auth.currentUser;return u?u.getIdToken():null},
   getOpen,setOpen:async v=>{await setDoc(doc(db,'cfg','open'),{open:!!v});OPEN=!!v},
   blob,putBlob,kvGet,kvSet,logAttempt,logView,
   users:async()=>(await getDocs(collection(db,'users'))).docs.map(d=>Object.assign({uid:d.id},d.data())),
