@@ -103,6 +103,16 @@ window.FB={
   setGrades:(uid,g)=>updateDoc(doc(db,'users',uid),{grades:g}),
   delUser:uid=>deleteDoc(doc(db,'users',uid)),
   atts:n=>rows('att',n),views:n=>rows('vw',n),
-  userAtts:uid=>byUid('att',uid),userViews:uid=>byUid('vw',uid)
+  userAtts:uid=>byUid('att',uid),userViews:uid=>byUid('vw',uid),
+  async ask(o){const u=auth.currentUser,p=state.prof;if(!u||!p)throw {code:'auth'};return addDoc(collection(db,'ask'),Object.assign({uid:u.uid,name:p.name||'',at:Date.now()},o))},
+  myAsks:()=>{const u=auth.currentUser;return u?byUid('ask',u.uid):Promise.resolve([])},
+  askSeen:id=>updateDoc(doc(db,'ask',id),{seen:true}),
+  asks:n=>rows('ask',n),
+  askReply:(id,r)=>updateDoc(doc(db,'ask',id),{reply:r,rat:Date.now(),seen:false}),
+  askDel:id=>deleteDoc(doc(db,'ask',id)),
+  async chNew(o){const u=auth.currentUser,p=state.prof;if(!u||!p)throw {code:'auth'};const n=p.name||'';
+    const r=await addDoc(collection(db,'ch'),{qid:o.qid,title:o.title,by:u.uid,name:n,at:Date.now(),res:{[u.uid]:Object.assign({n,at:Date.now()},o.r)}});return r.id},
+  chGet:async id=>{const s=await getDoc(doc(db,'ch',id));return s.exists()?Object.assign({_id:id},s.data()):null},
+  chPut:(id,r)=>{const u=auth.currentUser,p=state.prof;if(!u)return Promise.reject({code:'auth'});return updateDoc(doc(db,'ch',id),{['res.'+u.uid]:Object.assign({n:(p&&p.name)||'',at:Date.now()},r)})}
 };
 window.dispatchEvent(new Event('fbready'));

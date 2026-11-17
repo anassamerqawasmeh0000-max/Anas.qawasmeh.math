@@ -38,5 +38,26 @@ service cloud.firestore {
       allow create: if approved() && request.resource.data.uid == request.auth.uid;
       allow read, delete: if admin();
     }
+    match /ask/{d} {
+      allow create: if approved() && request.resource.data.uid == request.auth.uid
+        && request.resource.data.keys().hasOnly(['uid','name','at','text','img','ref','rt'])
+        && request.resource.data.text is string && request.resource.data.text.size() <= 1000
+        && (!('img' in request.resource.data) || (request.resource.data.img is string && request.resource.data.img.size() <= 400000));
+      allow read: if admin() || (signed() && resource.data.uid == request.auth.uid);
+      allow update: if admin() || (signed() && resource.data.uid == request.auth.uid
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['seen']));
+      allow delete: if admin();
+    }
+    match /ch/{d} {
+      allow read: if admin() || approved();
+      allow create: if approved() && request.resource.data.by == request.auth.uid
+        && request.resource.data.keys().hasOnly(['qid','title','by','name','at','res'])
+        && request.resource.data.res.keys().hasOnly([request.auth.uid]);
+      allow update: if approved()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['res'])
+        && request.resource.data.res.diff(resource.data.res).affectedKeys().hasOnly([request.auth.uid])
+        && !(request.auth.uid in resource.data.res);
+      allow delete: if admin();
+    }
   }
 }
