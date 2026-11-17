@@ -1,7 +1,7 @@
 /* الاتصال بالخادم: الحسابات + الأسئلة المحمية + المراقبة */
 import {initializeApp} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
 import {getAuth,onAuthStateChanged,createUserWithEmailAndPassword,signInWithEmailAndPassword,signOut,sendPasswordResetEmail,sendEmailVerification} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
-import {initializeFirestore,doc,getDoc,setDoc,updateDoc,deleteDoc,collection,getDocs,addDoc,query,orderBy,limit,onSnapshot} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+import {initializeFirestore,doc,getDoc,setDoc,updateDoc,deleteDoc,collection,getDocs,addDoc,query,orderBy,limit,onSnapshot,where} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
 const cfg={apiKey:"AIzaSyCM2ekbZQfb0zt1Z_gJwBH8URbEAnWT7J0",authDomain:"alraed-math-anas-qawasmeh.firebaseapp.com",projectId:"alraed-math-anas-qawasmeh",storageBucket:"alraed-math-anas-qawasmeh.firebasestorage.app",messagingSenderId:"690420503815",appId:"1:690420503815:web:177d4a289c4496fd6161a2"};
 const ADMIN='anassamerqawasmeh0000@gmail.com';
@@ -80,6 +80,7 @@ function logView(o){
   const u=auth.currentUser,p=state.prof;if(!u||!p)return;
   addDoc(collection(db,'vw'),Object.assign({uid:u.uid,name:p.name,at:Date.now()},o)).catch(()=>{});
 }
+const byUid=async(c,uid)=>(await getDocs(query(collection(db,c),where('uid','==',uid),limit(1500)))).docs.map(d=>Object.assign({_id:d.id},d.data())).sort((a,b)=>(b.at||0)-(a.at||0));
 const rows=async(c,n)=>(await getDocs(query(collection(db,c),orderBy('at','desc'),limit(n)))).docs.map(d=>Object.assign({_id:d.id},d.data()));
 
 window.FB={
@@ -101,6 +102,7 @@ window.FB={
   setStage:(uid,s)=>updateDoc(doc(db,'users',uid),{stage:s}),
   setGrades:(uid,g)=>updateDoc(doc(db,'users',uid),{grades:g}),
   delUser:uid=>deleteDoc(doc(db,'users',uid)),
-  atts:n=>rows('att',n),views:n=>rows('vw',n)
+  atts:n=>rows('att',n),views:n=>rows('vw',n),
+  userAtts:uid=>byUid('att',uid),userViews:uid=>byUid('vw',uid)
 };
 window.dispatchEvent(new Event('fbready'));
