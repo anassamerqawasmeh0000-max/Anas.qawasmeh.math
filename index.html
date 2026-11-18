@@ -636,7 +636,10 @@ function searchPage(q){
   box.innerHTML=o||'<div class="empty">ما في نتائج</div>'});
 }
 
+function toNew(){if(!/(^|\.)github\.io$/.test(location.hostname))return false;const m=decodeURIComponent(location.hash.replace('#','')).match(/^([a-z0-9]+?)-(.+)$/i),b=m&&book(m[1]);if(!b||VB[b.key]||!b.videos.some(x=>x.id===m[2]))return false;
+ app.innerHTML='<div class="empty">⏳ جاري تحويلك للمنصة الجديدة…</div>';location.replace('https://alraed-app.pages.dev/'+location.hash);return true}
 function render(){
+ if(toNew())return;
  if(!FBS||FBS.stage!=='ok')return gate(FBS);
  const h=decodeURIComponent(location.hash.replace('#',''));
  if(!h)return home();
@@ -821,7 +824,7 @@ function authForm(){
   const em=document.getElementById('fe').value.trim(),pw=document.getElementById('fw').value;
   const p=up?FB.signup(document.getElementById('fn').value.trim(),document.getElementById('fp').value.trim(),em,pw,document.getElementById('fs').value.trim().slice(0,30)):FB.login(em,pw);
   p.catch(x=>{ab.disabled=false;ae.textContent=errT(x)})}}
-function gate(s){
+function gate(s){if(toNew())return;
  s=s||{stage:'loading'};document.title='منصة الرائد في الرياضيات';
  const box=(h,lo)=>{app.innerHTML='<div class="gate">'+h+(lo?'<p class="alt"><a href="#" id="glo">تسجيل خروج</a></p>':'')+'</div>';const g=document.getElementById('glo');if(g)g.onclick=e=>{e.preventDefault();FB.logout()}};
  if(s.stage==='loading')return box('<div class="empty">جاري التحميل…</div>');
