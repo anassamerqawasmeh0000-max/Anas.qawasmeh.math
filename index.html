@@ -428,6 +428,9 @@ const QS={};let QI=null;
 let UP='';const SYNC={hist:1,wrong:1,cards:1};
 const LS={get(k){try{return JSON.parse(localStorage.getItem(UP+k))}catch(e){return null}},set(k,v){try{localStorage.setItem(UP+k,JSON.stringify(v))}catch(e){}if(SYNC[k]&&window.FB&&FBS&&FBS.stage==='ok'&&FBS.user)FB.kvSet(k,JSON.stringify(v))},del(k){try{localStorage.removeItem(UP+k)}catch(e){}}};
 let Q=null,ST=null,TM=null;
+function figSrc(f,id,n){if(!f)return '';f=String(f);const i=f.indexOf('data:');
+ if(i>=0){const d=f.slice(i);if(/^data:image\//.test(d))return d;return id&&id!=='custom'&&n?'quiz/figs/'+id+'-'+n+'.png?v=3':''}
+ if(/^https?:/.test(f))return f;const m=f.match(/figs\/[^"'?#\s]+/);return m?'quiz/'+m[0]+'?v=3':f}
 function loadQuiz(id){return QS[id]?Promise.resolve(QS[id]):FB.blob(id).catch(()=>null).then(t=>t?JSON.parse(t):fetch('quiz/'+id+'.json?v=2').then(r=>{if(!r.ok)throw 0;return r.json()})).then(j=>QS[id]=j)}
 function quizList(){return QI?Promise.resolve(QI):FB.blob('index').catch(()=>null).then(t=>t?JSON.parse(t):fetch('quiz/index.json').then(r=>r.ok?r.json():[])).catch(()=>[]).then(j=>Promise.all([fetch('quiz/g9.json?v=2'),fetch('quiz/g8.json?v=1')].map(p=>p.then(r=>r.ok?r.json():[]).catch(()=>[]))).then(a=>{const x=a[0].concat(a[1]);const ids={};j.forEach(q=>ids[q.id]=1);return j.concat(x.filter(q=>!ids[q.id]))})).then(j=>QI=j.filter(q=>gAllowed(qbk(q.id))))}
 function qstart(id){
@@ -458,7 +461,7 @@ function qrun(){
  const done=Object.keys(ST.a).length;
  app.innerHTML='<div class="qz-top"><span class="pill">سؤال '+N(ST.i+1)+' من '+N(n)+'</span><span class="pill" id="tm">⏱ --:--</span><span class="pill">أجبت '+N(done)+'</span></div>'
  +'<div class="qz-bar"><i style="width:'+(done/n*100)+'%"></i></div>'
- +'<div class="qz-card"><div class="qt"><span class="qn">'+N(q.n)+'</span>'+q.q+'</div>'+(q.fig?'<img class="qfig" src="'+q.fig+'" alt="">':'')
+ +'<div class="qz-card"><div class="qt"><span class="qn">'+N(q.n)+'</span>'+q.q+'</div>'+(figSrc(q.fig,Q.id,q.n)?'<img class="qfig" src="'+figSrc(q.fig,Q.id,q.n)+'" alt="الشكل" onerror="this.style.display=\'none\'">':'')
  +'<div class="ops">'+['a','b','c','d'].filter(k=>q.opts[k]!=null).map(k=>'<button class="op'+(q.opts[k].indexOf('mtable')>=0?' cs':'')+(sel===k?' sel':'')+'" data-k="'+k+'"><b>'+k+'</b><span>'+q.opts[k]+'</span></button>').join('')+'</div></div>'
  +'<div class="qnav">'+(ST.exam?'':'<button class="btn" id="pv"'+(ST.i?'':' disabled style="opacity:.4"')+'>› السابق</button><button class="btn" id="gr">☰ الأسئلة</button>')+(ST.i<n-1?'<button class="btn gold" id="nx">التالي ‹</button>':'<button class="btn gold" id="fin">إنهاء وتسليم</button>')+'</div>'
  +'<div class="qnav"><button class="btn red" id="fin2">إنهاء وتسليم الاختبار</button></div><div id="gw"></div>';
@@ -490,7 +493,7 @@ function qresult(f){
  +(ST.ch?'<div class="qnav"><button class="btn gold" id="chv">🏆 شوف نتيجة التحدي</button></div>':Q.id!=='custom'?'<div class="qnav"><button class="btn" id="chn">⚔️ تحدّى صديق بهالاختبار</button></div>':'')+'<div class="grid gr2">'+Q.questions.map(q=>'<button data-n="'+q.n+'" class="'+(ST.a[q.n]===q.ans?'ok':ST.a[q.n]?'bad':'')+'">'+N(q.n)+'</button>').join('')+'</div>'
  +'<div class="sh">مراجعة الأسئلة وطريقة الحل</div><div class="chips"><button class="chip'+(f==='all'?' on':'')+'" data-f="all">الكل ('+N(n)+')</button><button class="chip'+(f==='bad'?' on':'')+'" data-f="bad">الأخطاء ('+N(bad)+')</button><button class="chip'+(f==='no'?' on':'')+'" data-f="no">بدون إجابة ('+N(no)+')</button></div>'
  +(list.length?list.map(q=>{const a=ST.a[q.n],c=a===q.ans?'ok':a?'bad':'no';
-  return '<details class="rv '+c+'" id="r'+q.n+'"'+(f!=='all'?' open':'')+'><summary><span class="qn">'+N(q.n)+'</span><span style="flex:1">'+(c==='ok'?'✅ إجابتك صحيحة':c==='bad'?'❌ إجابتك خاطئة':'➖ لم تجب')+'</span><small style="color:var(--mut)">'+(a?'إجابتك: '+a+' — ':'')+'الصحيحة: '+q.ans+'</small></summary><div class="bd"><div class="qt">'+q.q+'</div>'+(q.fig?'<img class="qfig" src="'+q.fig+'" alt="">':'')
+  return '<details class="rv '+c+'" id="r'+q.n+'"'+(f!=='all'?' open':'')+'><summary><span class="qn">'+N(q.n)+'</span><span style="flex:1">'+(c==='ok'?'✅ إجابتك صحيحة':c==='bad'?'❌ إجابتك خاطئة':'➖ لم تجب')+'</span><small style="color:var(--mut)">'+(a?'إجابتك: '+a+' — ':'')+'الصحيحة: '+q.ans+'</small></summary><div class="bd"><div class="qt">'+q.q+'</div>'+(figSrc(q.fig,Q.id,q.n)?'<img class="qfig" src="'+figSrc(q.fig,Q.id,q.n)+'" alt="الشكل" onerror="this.style.display=\'none\'">':'')
   +'<div class="ops">'+['a','b','c','d'].filter(k=>q.opts[k]!=null).map(k=>'<div class="op '+(q.opts[k].indexOf('mtable')>=0?'cs ':'')+(k===q.ans?'ok':k===a?'bad':'')+'"><b>'+k+'</b><span>'+q.opts[k]+'</span></div>').join('')+'</div>'
   +'<div class="sol"><h4>طريقة الحل</h4><ol>'+q.sol.map(s=>'<li>'+s+'</li>').join('')+'</ol></div><button class="btn qask" data-q="'+q.n+'">💬 مش فاهم؟ اسأل الأستاذ</button></div></details>'}).join(''):'<div class="empty">لا توجد أسئلة في هذا القسم 👏</div>')
  +'<div class="qnav" style="flex-wrap:wrap"><button class="btn gold" id="again">🔁 حل الاختبار من جديد</button><button class="btn" id="shr">📤 مشاركة نتيجتي</button><a class="btn" href="'+qback()+'">رجوع</a></div>';
@@ -511,7 +514,7 @@ const pct=(a,b)=>b?Math.round(a/b*100):0;
 const dstr=t=>{try{return new Date(t).toLocaleDateString('ar-JO')}catch(e){return ''}};
 function histAdd(){const H=LS.get('hist')||[];H.push({id:Q.id,title:Q.title,score:ST.score,total:Q.total,t:Date.now(),exam:!!ST.exam});LS.set('hist',H.slice(-300));
  try{const K=q=>q.key||Q.id+':'+q.n;FB.logAttempt({qid:Q.id,title:Q.title,score:ST.score,total:Q.total,exam:!!ST.exam,dur:(ST.end||Date.now())-(ST.start||Date.now()),t:Q.questions.map(K),w:Q.questions.filter(q=>ST.a[q.n]!==q.ans).map(K)})}catch(e){}}
-function wrongSync(){const W=LS.get('wrong')||{};Q.questions.forEach(q=>{const k=q.key||Q.id+':'+q.n;if(ST.a[q.n]!==q.ans){if(!W[k])W[k]={q:q.q,opts:q.opts,ans:q.ans,sol:q.sol,fig:q.fig||'',title:Q.title,c:0}}});LS.set('wrong',W)}
+function wrongSync(){const W=LS.get('wrong')||{};Q.questions.forEach(q=>{const k=q.key||Q.id+':'+q.n;if(ST.a[q.n]!==q.ans){if(!W[k])W[k]={q:q.q,opts:q.opts,ans:q.ans,sol:q.sol,fig:figSrc(q.fig,Q.id,q.n),title:Q.title,c:0}}});LS.set('wrong',W)}
 function shareRes(){const sc=ST.score,tot=Q.total;const t='حليت «'+Q.title+'» على منصة الرائد في الرياضيات وجبت '+sc+' من '+tot+' ('+pct(sc,tot)+'٪)';const u=location.origin+location.pathname;
  if(navigator.share){navigator.share({text:t,url:u}).catch(()=>{})}else{try{navigator.clipboard.writeText(t+'\n'+u).then(()=>toast('تم نسخ النتيجة'))}catch(e){toast('تعذّر النسخ')}}}
 function toast(m){const d=document.createElement('div');d.textContent=m;d.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#0d1d3c;border:1px solid var(--gold2);color:var(--fg);padding:10px 18px;border-radius:12px;z-index:99';document.body.appendChild(d);setTimeout(()=>d.remove(),2200)}
@@ -529,7 +532,7 @@ function wrongPage(){
  if(!ks.length){app.innerHTML=h+'<div class="empty">الدفتر فاضي 👏 كمّل حل الاختبارات.</div>';return}
  if(WI===null||!W[WI])WI=ks[Math.floor(Math.random()*ks.length)];
  const w=W[WI];
- h+='<div class="chips"><span class="pill">في الدفتر: '+AR(ks.length)+' سؤال</span></div><div class="qz-card"><small style="color:var(--mut)">'+esc(w.title)+'</small><div class="qt">'+w.q+'</div>'+(w.fig?'<img class="qfig" src="'+w.fig+'" alt="">':'')+'<div class="ops">'
+ h+='<div class="chips"><span class="pill">في الدفتر: '+AR(ks.length)+' سؤال</span></div><div class="qz-card"><small style="color:var(--mut)">'+esc(w.title)+'</small><div class="qt">'+w.q+'</div>'+(figSrc(w.fig)?'<img class="qfig" src="'+figSrc(w.fig)+'" alt="الشكل" onerror="this.style.display=\'none\'">':'')+'<div class="ops">'
  +['a','b','c','d'].filter(k=>w.opts[k]!=null).map(k=>'<button class="op'+(w.opts[k].indexOf('mtable')>=0?' cs':'')+(WP?(k===w.ans?' ok':k===WP?' bad':''):'')+'" data-k="'+k+'"'+(WP?' disabled':'')+'><b>'+k+'</b><span>'+w.opts[k]+'</span></button>').join('')+'</div>'
  +(WP?'<div class="sol"><h4>'+(WP===w.ans?'✅ صح':'❌ غلط')+' — طريقة الحل</h4><ol>'+w.sol.map(x=>'<li>'+x+'</li>').join('')+'</ol></div>':'')+'</div>'
  +'<div class="qnav">'+(WP?'<button class="btn gold" id="nx">السؤال التالي ‹</button>':'<button class="btn" id="sk">تخطّي</button>')+'</div>';
@@ -682,7 +685,8 @@ async function diagPage(){app.innerHTML='<h1>🔧 فحص</h1><pre id="dg" dir="l
  w('cookies enabled: '+navigator.cookieEnabled+' | ua: '+navigator.userAgent.slice(0,90));
  try{const t=window.FB?await FB.token():null;w('token: '+(t?'yes '+t.length:'NO'));const r=await fetch('api/session',{method:'POST',headers:t?{Authorization:'Bearer '+t}:{},credentials:'same-origin'});w('session: '+r.status+' '+(await r.text()).slice(0,160))}catch(e){w('session ERR: '+e)}
  try{const r=await fetch('v/f3/L1-01.mp4',{headers:{Range:'bytes=0-99'},credentials:'same-origin'});w('video: '+r.status+' '+r.headers.get('content-type'))}catch(e){w('video ERR: '+e)}
- try{const r=await fetch('laws.json',{credentials:'same-origin'});w('laws: '+r.status)}catch(e){w('laws ERR: '+e)}}
+ try{const r=await fetch('laws.json',{credentials:'same-origin'});w('laws: '+r.status)}catch(e){w('laws ERR: '+e)}
+ try{const t=await FB.blob('U2L1-H1');w('blob: '+(t?t.length:'none'));if(t){const j=JSON.parse(t);w('n: '+j.questions.length+' keys: '+Object.keys(j.questions[0]).join(','));j.questions.slice(0,20).forEach(q=>{const s=String(q.q).replace(/<[^>]+>/g,'').slice(0,25);w(q.n+' fig='+(q.fig===undefined?'-':String(q.fig).slice(0,45)+' len'+String(q.fig).length)+' | '+s)})}}catch(e){w('blob ERR: '+e)}}
 /* ===== اسأل الأستاذ ===== */
 let ASKREF=null,MYA=null,MYAt=0;
 const fbErr=e=>e&&e.code==='permission-denied'?'الميزة لسا بتتفعّل، جرّب بعد شوي':errT(e);
