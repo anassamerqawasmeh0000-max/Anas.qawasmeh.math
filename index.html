@@ -647,6 +647,7 @@ function render(){
  if(h==='daily'){clearInterval(TM);return dailyPage()}
  if(h==='game'){clearInterval(TM);return gamePage()}
  if(h==='ask'){clearInterval(TM);return askPage()}
+ if(h==='diag'){clearInterval(TM);return diagPage()}
  if(h==='cards'){clearInterval(TM);return cardsPage()}
  const chm=h.match(/^ch-([A-Za-z0-9]+)$/);if(chm){if(ST&&ST.ch===chm[1]&&!ST.done&&TM)return;return chPage(chm[1])}
  const sm=h.match(/^s-(.*)$/);if(sm){clearInterval(TM);return searchPage(sm[1])}
@@ -663,6 +664,12 @@ function render(){
  if(!v)return shelf(b);
  player(b,v);
 }
+async function diagPage(){app.innerHTML='<h1>🔧 فحص</h1><pre id="dg" dir="ltr" style="white-space:pre-wrap;text-align:left;background:#0d1d3c;padding:12px;border-radius:10px;font-size:13px">...</pre>';const o=[],w=s=>{o.push(s);document.getElementById('dg').textContent=o.join('\n')};
+ w('host: '+location.host+' | gated: '+GATED+' | user: '+!!(FBS&&FBS.user)+' | admin: '+!!(FBS&&FBS.admin)+' | stage: '+(FBS&&FBS.stage));
+ w('cookies enabled: '+navigator.cookieEnabled+' | ua: '+navigator.userAgent.slice(0,90));
+ try{const t=window.FB?await FB.token():null;w('token: '+(t?'yes '+t.length:'NO'));const r=await fetch('api/session',{method:'POST',headers:t?{Authorization:'Bearer '+t}:{},credentials:'same-origin'});w('session: '+r.status+' '+(await r.text()).slice(0,160))}catch(e){w('session ERR: '+e)}
+ try{const r=await fetch('v/f3/L1-01.mp4',{headers:{Range:'bytes=0-99'},credentials:'same-origin'});w('video: '+r.status+' '+r.headers.get('content-type'))}catch(e){w('video ERR: '+e)}
+ try{const r=await fetch('laws.json',{credentials:'same-origin'});w('laws: '+r.status)}catch(e){w('laws ERR: '+e)}}
 /* ===== اسأل الأستاذ ===== */
 let ASKREF=null,MYA=null,MYAt=0;
 const fbErr=e=>e&&e.code==='permission-denied'?'الميزة لسا بتتفعّل، جرّب بعد شوي':errT(e);
