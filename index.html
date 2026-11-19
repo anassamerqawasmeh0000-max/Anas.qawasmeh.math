@@ -184,7 +184,7 @@ const AR=n=>String(n).replace(/\d/g,d=>'٠١٢٣٤٥٦٧٨٩'[d]);
 const book=k=>DATA.find(b=>b.key===k);
 const gAllowed=k=>{const s=FBS;if(!s||s.admin||!s.prof||!Array.isArray(s.prof.grades)||!s.prof.grades.length)return true;return s.prof.grades.includes(k)};
 const DATAV=()=>DATA.filter(b=>gAllowed(b.key));
-function blockedHash(h){let m=h.match(/^qz-([A-Za-z0-9-]+)$/);if(m)return !gAllowed(qbk(m[1]));m=h.match(/^(?:hu|h|t)-([a-z0-9]+)/i)||h.match(/^([a-z0-9]+?)(?:-.+)?$/i);const b=m&&book(m[1]);return !!(b&&!gAllowed(b.key))}
+function blockedHash(h){let m=h.match(/^qz-([A-Za-z0-9-]+)$/);if(m)return !gAllowed(qbk(m[1]));m=h.match(/^(?:hu|h[12]?|t[12]?)-([a-z0-9]+)/i)||h.match(/^([a-z0-9]+?)(?:-.+)?$/i);const b=m&&book(m[1]);return !!(b&&!gAllowed(b.key))}
 function denied(){clearInterval(TM);document.title='غير مفعّل';app.innerHTML='<div class="empty" style="padding:40px 10px"><h2>🔒 هذا الصف غير مفعّل لحسابك</h2><p>حسابك مفعّل للصفوف اللي حددها الأستاذ أنس فقط.<br>للاستفسار تواصل معه: <b dir="ltr">0781507070</b></p><a class="btn gold" href="#">الرئيسية</a></div>'}
 function item(b,v,cur){return '<a class="vi'+(v.id===cur?' on':'')+'" href="#'+b.key+'-'+v.id+'"><span class="id">'+v.id+'</span><span class="t">'+esc(v.t)+'</span>'+(v.k==='ext'?'<span class="tag">مثال إضافي</span>':'')+'</a>'}
 const ICON={g1:['١','#ff7a7a'],g2:['٢','#ffa45c'],g3:['٣','#ffd24d'],g4:['٤','#a6e05a'],g5:['٥','#4fd18b'],g6:['٦','#3fd0c9'],g7:['٧','#4aa3ff'],g8:['٨','#8a8cff'],g9:['٩','#c07cff'],g10:['١٠','#ff7cc3'],f3:['١','#4aa3ff'],s3:['٢','#f6d77a'],b2:['٪','#5fd6a3']};
@@ -356,15 +356,25 @@ function home(){
  document.getElementById('hs').onsubmit=e=>{e.preventDefault();location.hash='s-'+encodeURIComponent(document.getElementById('hq').value)};
  askBadge();
 }
+function semPage(b,T){
+ const G=GRADE[b.key],I=ICON[b.key]||['','#fff'];document.title=G[0]+' — '+G[1];
+ app.innerHTML='<div class="crumb"><a href="#">الرئيسية</a> ‹ '+(T?'اختبارات ':'')+esc(G[0])+'</div><h1>'+(T?'اختبارات ':'')+esc(G[0])+' — '+esc(G[1])+'</h1><p class="sub">اختر الفصل الدراسي:</p><div class="books">'
+ +'<a class="ex" style="--c:'+I[1]+'" href="#'+(T?'t1-':'h1-')+b.key+'"><i>١</i><div><b>الفصل الدراسي الأول</b><span>'+(T?'اختبارات تفاعلية وملفات PDF':'فيديوهات الشرح والاختبارات')+'</span></div></a>'
+ +'<a class="ex" style="--c:'+I[1]+'" href="#'+(T?'t2-':'h2-')+b.key+'"><i>٢</i><div><b>الفصل الدراسي الثاني</b><span>قريباً إن شاء الله</span></div></a></div>';
+}
+function sem2Page(b,T){
+ const G=GRADE[b.key];document.title=G[0]+' — الفصل الثاني';
+ app.innerHTML='<div class="crumb"><a href="#">الرئيسية</a> ‹ <a href="#'+(T?'t-':'h-')+b.key+'">'+(T?'اختبارات ':'')+esc(G[0])+'</a> ‹ الفصل الثاني</div><h1>الفصل الدراسي الثاني</h1><p class="sub">'+esc(G[0])+' — '+esc(G[1])+'</p><div class="empty">⏳ محتوى الفصل الثاني قيد التجهيز، وبيكون جاهز قريباً إن شاء الله.</div>';
+}
 function hub(b,T){
  const G=GRADE[b.key],U=UNITS[b.key];document.title=G[0]+' — '+G[1];
- app.innerHTML='<div class="crumb"><a href="#">الرئيسية</a> ‹ '+esc(G[0])+'</div><h1>'+(T?'اختبارات ':'')+esc(G[0])+' — '+esc(G[1])+'</h1><p class="sub">اختر الوحدة:</p><div class="books" id="ul"></div>';
+ app.innerHTML='<div class="crumb"><a href="#">الرئيسية</a> ‹ <a href="#'+(T?'t-':'h-')+b.key+'">'+(T?'اختبارات ':'')+esc(G[0])+'</a> ‹ الفصل الأول</div><h1>'+(T?'اختبارات ':'')+esc(G[0])+' — '+esc(G[1])+'</h1><p class="sub">الفصل الدراسي الأول — اختر الوحدة:</p><div class="books" id="ul"></div>';
  const I=ICON[b.key]||['','#fff'];
  document.getElementById('ul').innerHTML=U.u.map((u,i)=>'<a class="ex" style="--c:'+I[1]+'" href="#'+(T?'t-'+b.key+'-u':'hu-'+b.key+'-')+(i+1)+'"><i>'+(i+1)+'</i><div><b>'+esc(u[0])+'</b><span>'+esc(T?'اختبارات تفاعلية وملفات PDF':(u[1]||'فيديوهات واختبارات'))+'</span></div></a>').join('');
 }
 function unitPage(b,n){
  const G=GRADE[b.key],U=UNITS[b.key],u=U.u[n-1];document.title=u[0]+' — '+G[0];
- let h='<div class="crumb"><a href="#">الرئيسية</a> ‹ <a href="#h-'+b.key+'">'+esc(G[0])+'</a> ‹ '+esc(u[0])+'</div><h1>'+esc(u[0])+'</h1><p class="sub">'+esc(G[0])+' — '+esc(G[1])+'</p><div class="books">';
+ let h='<div class="crumb"><a href="#">الرئيسية</a> ‹ <a href="#h-'+b.key+'">'+esc(G[0])+'</a> ‹ <a href="#h1-'+b.key+'">الفصل الأول</a> ‹ '+esc(u[0])+'</div><h1>'+esc(u[0])+'</h1><p class="sub">'+esc(G[0])+' — '+esc(G[1])+'</p><div class="books">';
  const I=ICON[b.key]||['','#fff'];
  if(b.lu){const c=b.videos.filter(v=>b.lu[v.l]===n).length;if(c)h+='<a class="ex" style="--c:'+I[1]+'" href="#'+b.key+'-u'+n+'"><i>🎬</i><div><b>فيديوهات الشرح</b><span>'+AR(c)+' فيديو</span></div></a>'}else if(U.vu===n)h+='<a class="ex" style="--c:'+I[1]+'" href="#'+b.key+'"><i>🎬</i><div><b>فيديوهات الشرح</b><span>'+AR(b.videos.length)+' فيديو</span></div></a>';
  h+='<a class="ex" style="--c:'+I[1]+'" href="#t-'+b.key+'-u'+n+'"><i>📝</i><div><b>الاختبارات</b><span>اختبارات تفاعلية وملفات PDF</span></div></a></div>';
@@ -675,9 +685,10 @@ function render(){
  const chm=h.match(/^ch-([A-Za-z0-9]+)$/);if(chm){if(ST&&ST.ch===chm[1]&&!ST.done&&TM)return;return chPage(chm[1])}
  const sm=h.match(/^s-(.*)$/);if(sm){clearInterval(TM);return searchPage(sm[1])}
  clearInterval(TM);
- const hm=h.match(/^h-([a-z0-9]+)$/i);if(hm){const hb=book(hm[1]);return hb?hub(hb):home()}
+ const hm=h.match(/^h-([a-z0-9]+)$/i);if(hm){const hb=book(hm[1]);return hb?semPage(hb):home()}
+ const sx=h.match(/^(h|t)([12])-([a-z0-9]+)$/i);if(sx){const sb=book(sx[3]);if(!sb)return home();const T=sx[1]==='t'?1:0;return sx[2]==='1'?hub(sb,T):sem2Page(sb,T)}
  const um=h.match(/^hu-([a-z0-9]+)-([1-4])$/i);if(um){const ub=book(um[1]);return ub&&+um[2]<=UNITS[ub.key].u.length?unitPage(ub,+um[2]):home()}
- const tm=h.match(/^t-([a-z0-9]+?)(?:-u([1-4]))?$/i);if(tm){const tb=book(tm[1]);return tb?(tm[2]?tests(tb,+tm[2]):hub(tb,1)):home()}
+ const tm=h.match(/^t-([a-z0-9]+?)(?:-u([1-4]))?$/i);if(tm){const tb=book(tm[1]);return tb?(tm[2]?tests(tb,+tm[2]):semPage(tb,1)):home()}
  const m=h.match(/^([a-z0-9]+?)(?:-(.+))?$/i);
  const b=m&&book(m[1]);
  if(!b)return home();
