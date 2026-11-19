@@ -942,8 +942,8 @@ async function adUpload(ad){
  const lg=t=>{const u=document.getElementById('ul');if(u){u.textContent+=t+'\n';u.scrollTop=u.scrollHeight}};
  document.getElementById('upb').onclick=async function(){this.disabled=true;
   try{const FC={},inl=async s=>{const ms=[...new Set(s.match(/figs\/[A-Za-z0-9_.-]+\.(?:png|jpg|jpeg|svg)/g)||[])];for(const m of ms){if(!FC[m]){const b=await (await fetch('quiz/'+m)).blob();FC[m]=await new Promise(r=>{const f=new FileReader();f.onload=()=>r(f.result);f.readAsDataURL(b)})}s=s.split(m).join(FC[m])}return s};
-   const nr=await fetch('quiz/new-index.json');if(!nr.ok)throw new Error('ما في أسئلة جديدة للرفع');const ix=await nr.json();let i=0;
-   for(const x of ix){i++;let s=await (await fetch('quiz/'+x.id+'.json')).text();s=await inl(s);const n=await FB.putBlob(x.id,s);lg(i+'/'+ix.length+'  '+x.id+'  ('+n+')')}
+   const nr=await fetch('quiz/new-index.json?t='+Date.now(),{cache:'no-store'});if(!nr.ok)throw new Error('ما في أسئلة جديدة للرفع');const ix=await nr.json();let i=0;
+   for(const x of ix){i++;let s=await (await fetch('quiz/'+x.id+'.json?t='+Date.now(),{cache:'no-store'})).text();s=await inl(s);const n=await FB.putBlob(x.id,s);lg(i+'/'+ix.length+'  '+x.id+'  ('+n+')')}
    const cur=have?JSON.parse(have):[];const mp=new Map(cur.map(q=>[q.id,q]));ix.forEach(q=>mp.set(q.id,q));
    const all=[...mp.values()];await FB.putBlob('index',JSON.stringify(all));QI=null;lg('الفهرس: '+all.length+' اختبار');
    await FB.putBlob('fx',await (await fetch('fx.json')).text());
