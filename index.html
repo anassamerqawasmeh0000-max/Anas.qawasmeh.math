@@ -704,6 +704,7 @@ async function diagPage(){app.innerHTML='<h1>🔧 فحص</h1><pre id="dg" dir="l
  try{const t=window.FB?await FB.token():null;w('token: '+(t?'yes '+t.length:'NO'));const r=await fetch('api/session',{method:'POST',headers:t?{Authorization:'Bearer '+t}:{},credentials:'same-origin'});w('session: '+r.status+' '+(await r.text()).slice(0,160))}catch(e){w('session ERR: '+e)}
  try{const r=await fetch('v/f3/L1-01.mp4',{headers:{Range:'bytes=0-99'},credentials:'same-origin'});w('video: '+r.status+' '+r.headers.get('content-type'))}catch(e){w('video ERR: '+e)}
  try{const r=await fetch('laws.json',{credentials:'same-origin'});w('laws: '+r.status)}catch(e){w('laws ERR: '+e)}
+ try{const ix=JSON.parse(await FB.blob('index'));w('index '+ix.length+': '+ix.map(q=>q.id).filter(i=>!/^(F[13]L|U2L|U3L|S1L|[A-G]$)/.test(i)).join(' '));w('S/U3: '+ix.filter(q=>/^(S|U3)/.test(q.id)).map(q=>q.id+'('+q.count+')').join(' '))}catch(e){w('ix ERR '+e)}
  try{const t=await FB.blob('U2L1-H1');w('blob: '+(t?t.length:'none'));if(t){const j=JSON.parse(t);w('n: '+j.questions.length+' keys: '+Object.keys(j.questions[0]).join(','));j.questions.slice(0,20).forEach(q=>{const s=String(q.q).replace(/<[^>]+>/g,'').slice(0,25);w(q.n+' fig='+(q.fig===undefined?'-':String(q.fig).slice(0,45)+' len'+String(q.fig).length)+' | '+s)})}}catch(e){w('blob ERR: '+e)}}
 /* ===== اسأل الأستاذ ===== */
 let ASKREF=null,MYA=null,MYAt=0;
@@ -954,6 +955,7 @@ async function adUpload(ad){
  document.getElementById('upb').onclick=async function(){this.disabled=true;
   try{const FC={},inl=async s=>{const ms=[...new Set(s.match(/figs\/[A-Za-z0-9_.-]+\.(?:png|jpg|jpeg|svg)/g)||[])];for(const m of ms){if(!FC[m]){const b=await (await fetch('quiz/'+m)).blob();FC[m]=await new Promise(r=>{const f=new FileReader();f.onload=()=>r(f.result);f.readAsDataURL(b)})}s=s.split(m).join(FC[m])}return s};
    const nr=await fetch('quiz/new-index.json?t='+Date.now(),{cache:'no-store'});if(!nr.ok)throw new Error('ما في أسئلة جديدة للرفع');const ix=await nr.json();let i=0;
+   {const old=new Map((have?JSON.parse(have):[]).map(q=>[q.id,q])),cl=ix.filter(x=>old.has(x.id)&&old.get(x.id).title!==x.title);if(cl.length&&!confirm('⚠️ في '+cl.length+' اختبار موجودين على المنصة بنفس الرقم ورح ينكتب فوقهم:\n'+cl.map(x=>x.id+' — '+old.get(x.id).title).join('\n')+'\n\nأكمل؟')){lg('انلغى الرفع');this.disabled=false;return}}
    for(const x of ix){i++;let s=await (await fetch('quiz/'+x.id+'.json?t='+Date.now(),{cache:'no-store'})).text();s=await inl(s);const n=await FB.putBlob(x.id,s);lg(i+'/'+ix.length+'  '+x.id+'  ('+n+')')}
    const cur=have?JSON.parse(have):[];const mp=new Map(cur.map(q=>[q.id,q]));ix.forEach(q=>mp.set(q.id,q));
    const all=[...mp.values()];await FB.putBlob('index',JSON.stringify(all));QI=null;lg('الفهرس: '+all.length+' اختبار');
