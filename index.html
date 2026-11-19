@@ -572,20 +572,25 @@ function mkPage(){
  app.innerHTML='<div class="crumb"><a href="#">الرئيسية</a> ‹ اختبار مخصص</div><h1>🎲 اختبار مخصص</h1><p class="sub">اختر وأنا بجهّز لك ورقة جديدة من بنك الأسئلة.</p><div class="qz-card mkf">'
  +'<label>الكتاب<select id="mb">'+u.map(x=>'<option value="'+x[0]+'">'+x[1]+'</option>').join('')+'</select></label>'
  +'<label>الوحدة<select id="mu"></select></label>'
+ +'<label>الدرس<select id="mlz"><option value="">كل الدروس</option></select></label>'
  +'<label>المستوى<select id="ml"><option value="">كل المستويات</option><option value="E">سهل</option><option value="M">متوسط</option><option value="H">صعب</option></select></label>'
- +'<label>عدد الأسئلة<select id="mc"><option>10</option><option selected>20</option><option>30</option><option>50</option></select></label>'
+ +'<label>عدد الأسئلة<select id="mc"><option>10</option><option selected>20</option><option>30</option><option>40</option><option>50</option></select></label>'
  +'<label class="chk"><input type="checkbox" id="mx"><span>وضع الامتحان: بدون رجوع للأسئلة السابقة</span></label>'
  +'<button class="btn gold" id="mg">ابدأ</button><div id="mm" class="sub"></div></div>';
  const mb=document.getElementById('mb'),mu=document.getElementById('mu');
- const fillU=()=>{mu.innerHTML=UNITS[mb.value].u.map((x,i)=>'<option value="'+(i+1)+'">'+esc(x[0])+'</option>').join('')};fillU();mb.onchange=fillU;
+ const mlz=document.getElementById('mlz');
+ const lname=t=>{const p=String(t||'').split(' — ');return (p[1]||'').replace(/^الدرس [^:]+:\s*/,'')||t};
+ const fillL=()=>{mlz.innerHTML='<option value="">كل الدروس</option>';quizList().then(L=>{const S={};L.filter(x=>(x.unit||1)===+mu.value&&qbk(x.id)===mb.value&&x.lesson>0).forEach(x=>{if(!S[x.lesson])S[x.lesson]=lname(x.title)});
+  mlz.innerHTML='<option value="">كل الدروس</option>'+Object.keys(S).sort((a,b)=>a-b).map(k=>'<option value="'+k+'">الدرس '+AR(k)+': '+esc(S[k])+'</option>').join('')}).catch(()=>{})};
+ const fillU=()=>{mu.innerHTML=UNITS[mb.value].u.map((x,i)=>'<option value="'+(i+1)+'">'+esc(x[0])+'</option>').join('');fillL()};fillU();mb.onchange=fillU;mu.onchange=fillL;
  document.getElementById('mg').onclick=()=>{
   const lv=document.getElementById('ml').value,n=+document.getElementById('mc').value,un=+mu.value,bk=mb.value,m=document.getElementById('mm');
   m.textContent='جاري التجهيز…';
-  quizList().then(L=>{const base=L.filter(x=>(x.unit||1)===un&&qbk(x.id)===bk);L=base.filter(x=>!lv||x.level===lv);if(!L.length){m.textContent=base.length&&lv?'هذه الوحدة فيها نماذج امتحانات كاملة فقط بدون تقسيم للمستويات، اختر «كل المستويات».':'ما في أسئلة مناسبة لهذا الاختيار بعد.';return}
+  const lz=+mlz.value||0;quizList().then(L=>{const base=L.filter(x=>(x.unit||1)===un&&qbk(x.id)===bk&&(!lz||x.lesson===lz));L=base.filter(x=>!lv||x.level===lv);if(!L.length){m.textContent=base.length&&lv?'هذه الوحدة فيها نماذج امتحانات كاملة فقط بدون تقسيم للمستويات، اختر «كل المستويات».':'ما في أسئلة مناسبة لهذا الاختيار بعد.';return}
    return Promise.all(L.map(x=>loadQuiz(x.id))).then(qs=>{let P=[];qs.forEach(q=>q.questions.forEach(x=>P.push(Object.assign({},x,{key:q.id+':'+x.n}))));
     for(let i=P.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[P[i],P[j]]=[P[j],P[i]]}
     P=P.slice(0,n).map((x,i)=>Object.assign(x,{n:i+1,marks:1}));
-    const cq={id:'custom',unit:un,title:'اختبار مخصص — '+UNITS[bk].u[un-1][0],time:Math.ceil(P.length*1.2)+' دقيقة',total:P.length,questions:P};
+    const cq={id:'custom',unit:un,title:'اختبار مخصص — '+(lz?mlz.options[mlz.selectedIndex].text:UNITS[bk].u[un-1][0]),time:Math.ceil(P.length*1.2)+' دقيقة',total:P.length,questions:P};
     LS.set('cq',cq);ST={start:Date.now(),a:{},i:0,exam:document.getElementById('mx').checked};LS.set('qz-custom',ST);Q=cq;qrun();scrollTo(0,0)})}).catch(()=>{m.textContent='تعذّر التجهيز، حاول مرة ثانية.'})}
 }
 let LW=null;
@@ -935,9 +940,10 @@ async function adUpload(ad){
  const lg=t=>{const u=document.getElementById('ul');if(u){u.textContent+=t+'\n';u.scrollTop=u.scrollHeight}};
  document.getElementById('upb').onclick=async function(){this.disabled=true;
   try{const FC={},inl=async s=>{const ms=[...new Set(s.match(/figs\/[A-Za-z0-9_.-]+\.(?:png|jpg|jpeg|svg)/g)||[])];for(const m of ms){if(!FC[m]){const b=await (await fetch('quiz/'+m)).blob();FC[m]=await new Promise(r=>{const f=new FileReader();f.onload=()=>r(f.result);f.readAsDataURL(b)})}s=s.split(m).join(FC[m])}return s};
-   const ix=await (await fetch('quiz/index.json')).json();let i=0;
+   const nr=await fetch('quiz/new-index.json');if(!nr.ok)throw new Error('ما في أسئلة جديدة للرفع');const ix=await nr.json();let i=0;
    for(const x of ix){i++;let s=await (await fetch('quiz/'+x.id+'.json')).text();s=await inl(s);const n=await FB.putBlob(x.id,s);lg(i+'/'+ix.length+'  '+x.id+'  ('+n+')')}
-   await FB.putBlob('index',JSON.stringify(ix));
+   const cur=have?JSON.parse(have):[];const mp=new Map(cur.map(q=>[q.id,q]));ix.forEach(q=>mp.set(q.id,q));
+   const all=[...mp.values()];await FB.putBlob('index',JSON.stringify(all));QI=null;lg('الفهرس: '+all.length+' اختبار');
    await FB.putBlob('fx',await (await fetch('fx.json')).text());
    lg('✅ خلصت');toast('تم رفع الأسئلة')}catch(e){lg('❌ '+(e&&e.message||e));this.disabled=false}}}
 /* ===== تثبيت المنصة كتطبيق ===== */
