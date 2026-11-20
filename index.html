@@ -113,6 +113,16 @@ footer{text-align:center;color:var(--mut);font-size:14px;padding:20px 16px 40px}
 .bkp{position:relative;background:#fff;border-radius:8px;overflow:hidden;line-height:0;box-shadow:0 2px 12px rgba(0,0,0,.25)}.bkp img{width:100%;height:auto;display:block;min-height:200px}
 .hs{position:absolute;border:1.5px solid #d4a537;background:rgba(212,165,55,.10);border-radius:5px;animation:hsp 1.6s ease 2}.hs i{position:absolute;top:0;right:0;transform:translate(45%,-45%);width:14px;height:14px;border-radius:50%;background:#d4a537;color:#1b2a4a;font-style:normal;font-size:7px;line-height:14px;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,.35)}.hs:active{background:rgba(212,165,55,.35)}
 @keyframes hsp{50%{background:rgba(212,165,55,.35)}}
+.bkm{position:fixed;inset:0;z-index:2000;background:var(--bg,#0d1830);display:flex;flex-direction:column}
+.bkmh{display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid var(--line)}.bkmh b{flex:1;color:#d4a537}
+.bkt{display:flex;gap:8px;padding:8px 12px}.bkt .btn{flex:1}.bkt .btn.on{background:#d4a537;color:#1b2a4a}
+.bkmb{flex:1;overflow:auto;padding:4px 12px 30px;-webkit-overflow-scrolling:touch}
+.sc1{background:var(--card);border:1px solid var(--line);border-right:5px solid #3b82f6;border-radius:12px;padding:10px 12px;margin:8px 0;line-height:1.8}
+.sc1 .t{font-weight:700;margin-bottom:4px;color:#7fb0ff}.sc1.idea{border-right-color:#a78bfa}.sc1.idea .t{color:#c4b5fd}.sc1.ck{border-right-color:#22c55e}.sc1.ck .t{color:#86efac}
+.sc1.an{border-right-color:#22c55e;background:rgba(34,197,94,.12)}.sc1.an .t{color:#86efac}.sc1.tp{border-right-color:#d4a537}.sc1.tp .t{color:#d4a537}
+.sc1 .lw{direction:ltr;overflow-x:auto;overflow-y:hidden;margin:2px 0}.sc1 .lw .katex-display{margin:4px 0}
+.sc1 .rl{margin-top:6px;background:rgba(167,139,250,.12);border-radius:8px;padding:6px 10px}
+.st1{display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-bottom:1px dashed var(--line)}.st1:last-child{border-bottom:0}.st1>i{font-style:normal;background:#3b82f6;color:#fff;border-radius:50%;min-width:26px;height:26px;line-height:26px;text-align:center;font-weight:700;margin-top:4px}.st1>div{flex:1;min-width:0}.st1 .sy{color:var(--mut,#c9d3e6)}
 </style>
 <link rel="stylesheet" href="katex/katex.min.css">
 <style>
@@ -667,7 +677,7 @@ function searchPage(q){
 
 const BKS={f3:{t:'كتاب الطالب — الأول الثانوي',s:'الفصل الدراسي الأول',n:163,toc:[['الوحدة 1: الاقترانات والمقادير الجبرية',6,[['الدرس 1: الاقترانات المتشعّبة',8],['الدرس 2: حل معادلات القيمة المطلقة ومتبايناتها',19],['الدرس 3: نظريتا الباقي والعوامل',26],['الدرس 4: الكسور الجزئية',39],['اختبار نهاية الوحدة',48]]],['الوحدة 2: الاقترانات المثلثية',50,[['الدرس 1: قياس الزاوية بالراديان',52],['الدرس 2: الاقترانات المثلثية',63],['الدرس 3: تمثيل الاقترانات الجيبية بيانياً',76],['معمل برمجية جيوجبرا',89],['اختبار نهاية الوحدة',90]]],['الوحدة 3: النهايات والمشتقات',92,[['الدرس 1: النهايات والاتصال',94],['الدرس 2: الاشتقاق',108],['الدرس 3: القيم العظمى والصغرى',119],['الدرس 4: المشتقة الثانية وتطبيقاتها',128],['الدرس 5: تطبيقات القيم القصوى',137],['الدرس 6: قاعدة السلسلة',148],['اختبار نهاية الوحدة',158]]],['ملحقات',160,[]]]}};
 let BKM={};
-function bkMap(k){if(BKM[k])return Promise.resolve(BKM[k]);return sessFresh().then(()=>fetch('v/book/'+k+'/map.json?v=1',{credentials:'same-origin'})).then(r=>r.ok?r.json():[]).catch(()=>[]).then(m=>{const o={};(m||[]).forEach(x=>{(o[x.p]=o[x.p]||[]).push(x)});return BKM[k]=o})}
+function bkMap(k){if(BKM[k])return Promise.resolve(BKM[k]);return sessFresh().then(()=>fetch('v/book/'+k+'/map.json?v=2',{credentials:'same-origin'})).then(r=>r.ok?r.json():[]).catch(()=>[]).then(m=>{const o={};(m||[]).forEach(x=>{(o[x.p]=o[x.p]||[]).push(x)});return BKM[k]=o})}
 function bkWhere(B,p){let u=null,l=null;B.toc.forEach(U=>{if(p>=U[1]){u=U;l=null;U[2].forEach(L=>{if(p>=L[1])l=L})}});return [u,l]}
 function bookPage(k,p){
  const B=BKS[k],b=book(k);if(!B||!b)return home();const G=GRADE[k];
@@ -677,7 +687,7 @@ function bookPage(k,p){
   h+='<form class="bkf" onsubmit="event.preventDefault();const n=+this.n.value;if(n>=1&&n<='+B.n+')location.hash=\'bk-'+k+'-\'+n"><input name="n" type="number" inputmode="numeric" min="1" max="'+B.n+'" placeholder="رقم الصفحة"><button>اذهب للصفحة</button></form><div class="bktoc" id="bktoc">';
   h+=B.toc.map(U=>'<a class="bku" href="#bk-'+k+'-'+U[1]+'"><b>'+esc(U[0])+'</b><span>'+AR(U[1])+'</span></a>'+U[2].map(L=>'<a class="bkl" href="#bk-'+k+'-'+L[1]+'"><span>'+esc(L[0])+'</span><i data-from="'+L[1]+'"></i><span>'+AR(L[1])+'</span></a>').join('')).join('')+'</div>';
   app.innerHTML=h;
-  bkMap(k).then(M=>{const all=[];B.toc.forEach(U=>U[2].forEach(L=>all.push(L[1])));all.push(B.n+1);document.querySelectorAll('#bktoc i[data-from]').forEach(e=>{const a=+e.dataset.from,z=all.find(x=>x>a)||B.n+1;let c=0;for(let q=a;q<z;q++)c+=(M[q]||[]).length;if(c)e.textContent='🎬 '+AR(c)+' فيديو'})});
+  bkMap(k).then(M=>{const all=[];B.toc.forEach(U=>U[2].forEach(L=>all.push(L[1])));all.push(B.n+1);document.querySelectorAll('#bktoc i[data-from]').forEach(e=>{const a=+e.dataset.from,z=all.find(x=>x>a)||B.n+1;let c=0;for(let q=a;q<z;q++)c+=(M[q]||[]).length;if(c)e.textContent='✍️ '+AR(c)+' سؤال محلول'})});
   return}
  p=Math.max(1,Math.min(B.n,p));LS.set('bk-'+k,p);try{sessionStorage.removeItem('bkret')}catch(e){}
  const [U,L]=bkWhere(B,p),pad=n=>String(n).padStart(3,'0');document.title='صفحة '+p+' — '+B.t;
@@ -689,12 +699,41 @@ function bookPage(k,p){
  img.onerror=()=>{if(tries++<2)sessFresh(true).then(()=>{img.src=src(p)+'?r='+tries});else document.getElementById('bkp').innerHTML='<div class="empty">تعذّر تحميل الصفحة. <a href="javascript:location.reload()">أعد التحميل</a> أو تواصل معنا 0781507070</div>'};
  sessFresh().then(()=>{img.src=src(p);[p+1,p-1].forEach(n=>{if(n>=1&&n<=B.n){const x=new Image();x.src=src(n)}})});
  bkMap(k).then(M=>{const hs=M[p]||[],box=document.getElementById('bkp');if(!box)return;
-  hs.forEach(x=>{const a=document.createElement('a');a.className='hs';a.href='#'+k+'-'+x.v;a.title=x.lab||'';a.style.cssText='left:'+x.x+'%;top:'+x.y+'%;width:'+x.w+'%;height:'+x.h+'%';a.innerHTML='<i>▶</i>';a.onclick=()=>{try{sessionStorage.setItem('bkret',k+'|'+p)}catch(e){}};box.appendChild(a)});
-  const hh=document.getElementById('bkh');if(hh)hh.innerHTML=hs.length?'🎬 بهالصفحة '+AR(hs.length)+' '+(hs.length>2&&hs.length<11?'أسئلة':'سؤال')+' إلها فيديو شرح — اضغط على السؤال المحدد بالإطار الذهبي':'' });
+  hs.forEach(x=>{const a=document.createElement('a');a.className='hs';a.href='javascript:void 0';a.title=x.lab||'';a.style.cssText='left:'+x.x+'%;top:'+x.y+'%;width:'+x.w+'%;height:'+x.h+'%';a.innerHTML='<i>▶</i>';a.onclick=e=>{e.preventDefault();bkOpen(k,p,x)};box.appendChild(a)});
+  const hh=document.getElementById('bkh');if(hh)hh.innerHTML=hs.length?'✍️🎬 اضغط على أي سؤال محدد بالإطار الذهبي لتشوف حلّه مكتوب وفيديو شرحه ('+AR(hs.length)+(hs.length>2&&hs.length<11?' أسئلة':' سؤال')+' بهالصفحة)':'' });
  let sx=null,sy=null;const P=document.getElementById('bkp');
  P.addEventListener('touchstart',e=>{if(e.touches.length!==1){sx=null;return}sx=e.touches[0].clientX;sy=e.touches[0].clientY},{passive:true});
  P.addEventListener('touchend',e=>{if(sx===null)return;const dx=e.changedTouches[0].clientX-sx,dy=e.changedTouches[0].clientY-sy;sx=null;if(Math.abs(dx)>70&&Math.abs(dx)>2*Math.abs(dy)&&(!window.visualViewport||visualViewport.scale<=1.05)){const n=dx<0?p-1:p+1;if(n>=1&&n<=B.n)location.hash='bk-'+k+'-'+n}},{passive:true});
 }
+
+let BKS2={};
+function bkSol(k,f){const key=k+'/'+f;if(BKS2[key])return Promise.resolve(BKS2[key]);return sessFresh().then(()=>fetch('v/book/'+k+'/s/'+f+'.json?v='+(window.BKV||1),{credentials:'same-origin'})).then(r=>r.ok?r.json():{}).catch(()=>({})).then(o=>BKS2[key]=o)}
+function bkClose(){const m=document.getElementById('bkm');if(!m)return;const v=m.querySelector('video');if(v){try{v.pause()}catch(e){}}m.remove();document.body.style.overflow=''}
+window.addEventListener('popstate',()=>{if(document.getElementById('bkm'))bkClose()});
+function bkOpen(k,p,x){bkClose();const m=document.createElement('div');m.id='bkm';m.className='bkm';
+ m.innerHTML='<div class="bkmh"><button class="btn" id="bkx">✕ رجوع للصفحة</button><b>'+esc(x.lab||'')+'</b></div><div class="bkt"><button class="btn on" data-t="s">✍️ الحل المكتوب</button><button class="btn" data-t="v">🎬 فيديو الشرح</button></div><div class="bkmb" id="bkmb"><div class="empty">⏳ جاري تحميل الحل…</div></div>';
+ document.body.appendChild(m);document.body.style.overflow='hidden';try{history.pushState({bkm:1},'')}catch(e){}
+ document.getElementById('bkx').onclick=()=>{try{history.back()}catch(e){bkClose()}};
+ let sol=null;const body=document.getElementById('bkmb');
+ const showS=()=>{const v=body.querySelector('video');if(v)try{v.pause()}catch(e){}
+  if(!sol){body.innerHTML='<div class="empty">الحل المكتوب لهالسؤال لسا ما انضاف.</div>';return}
+  let h='';if(sol.idea)h+='<div class="sc1 idea"><div class="t">💡 فكرة الحل</div><div>'+sol.idea+'</div>'+(sol.law?'<div class="lw">'+sol.law+'</div>':'')+(sol.rule?'<div class="rl"><b>القاعدة: </b>'+sol.rule+'</div>':'')+'</div>';
+  h+='<div class="sc1"><div class="t">✍️ الحل خطوة بخطوة</div>'+sol.st.map((s,i)=>'<div class="st1"><i>'+AR(i+1)+'</i><div>'+(s[0]?'<div class="lw">'+s[0]+'</div>':'')+'<div class="sy">'+s[1]+'</div></div></div>').join('')+'</div>';
+  if(sol.chk)h+='<div class="sc1 ck"><div class="t">✅ نتحقق</div>'+(sol.chk[0]?'<div class="lw">'+sol.chk[0]+'</div>':'')+'<div>'+sol.chk[1]+'</div></div>';
+  h+='<div class="sc1 an"><div class="t">✔ الجواب</div><div>'+sol.ans+'</div></div>';
+  if(sol.tip)h+='<div class="sc1 tp"><div class="t">⭐ تذكّر</div><div>'+sol.tip+'</div></div>';
+  h+='<button class="btn gold" id="bkgv" style="width:100%;margin:6px 0 12px">🎬 شوف فيديو الشرح</button><button class="btn" id="bkask" style="width:100%">💬 مش فاهم؟ اسأل الأستاذ عن هالسؤال</button>';
+  body.innerHTML=h;body.scrollTop=0;document.getElementById('bkgv').onclick=()=>tab('v');
+  document.getElementById('bkask').onclick=()=>{bkClose();askGo('#bk-'+k+'-'+p,(x.lab||'سؤال')+' — صفحة '+p+' ('+GRADE[k][0]+')')}};
+ const showV=()=>{const vp=x.v?'v/'+k+'/'+x.v+'.mp4':(x.nv?'v/book/'+k+'/vid/'+x.id+'.mp4':'');
+  if(!vp){body.innerHTML='<div class="empty">🎬 فيديو هالسؤال قيد التجهيز. اقرأ الحل المكتوب لحد ما يجهز.</div>';return}
+  body.innerHTML='<div class="pl" id="plw"><video id="vid" controls controlsList="nodownload noremoteplayback" disablePictureInPicture oncontextmenu="return false" playsinline preload="metadata"></video><div id="verr"></div><div id="wm"></div></div><div class="note">الفيديو بدون صوت: تابع الشرح المكتوب على الشاشة، وأوقفه بأي وقت.</div>';
+  const vid=document.getElementById('vid');vidLoad(vid,vp,vp);try{wmStart(vid)}catch(e){}try{FB.logView({k:k,id:x.v||x.id,t:'الكتاب ص'+p+': '+(x.lab||'')})}catch(e){}};
+ const tab=t=>{m.querySelectorAll('[data-t]').forEach(b=>b.classList.toggle('on',b.dataset.t===t));t==='v'?showV():showS()};
+ m.querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>tab(b.dataset.t));
+ if(x.k)bkSol(k,x.k).then(o=>{sol=o[x.id]||null;if(m.querySelector('[data-t="s"].on'))showS()});else{sol=null;showS()}
+}
+
 function bkRet(){let r=null;try{r=sessionStorage.getItem('bkret')}catch(e){}if(!r)return;const [k,p]=r.split('|');const a=document.createElement('a');a.className='bkgo';a.href='#bk-'+k+'-'+p;a.textContent='↩ رجوع للكتاب — صفحة '+AR(p);app.insertBefore(a,app.firstChild)}
 
 function toNew(){if(!/(^|\.)github\.io$/.test(location.hostname))return false;if(/^#bk-/.test(location.hash)){app.innerHTML='<div class="empty">⏳ جاري تحويلك للمنصة الجديدة…</div>';location.replace('https://alraed-app.pages.dev/'+location.hash);return true}const m=decodeURIComponent(location.hash.replace('#','')).match(/^([a-z0-9]+?)-(.+)$/i),b=m&&book(m[1]);if(!b||VB[b.key]||!b.videos.some(x=>x.id===m[2]))return false;
