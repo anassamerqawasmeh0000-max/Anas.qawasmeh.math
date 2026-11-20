@@ -105,6 +105,14 @@ footer{text-align:center;color:var(--mut);font-size:14px;padding:20px 16px 40px}
 .gm-end{text-align:center;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px 12px;margin-top:14px}.gm-big{font-family:'Reem Kufi',Cairo;font-size:54px;color:var(--gold)}.gm-big small{font-size:20px;color:var(--mut)}.gm-rec{color:var(--gold);font-size:20px;margin:0 0 8px}
 .dq-q{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px 14px;font-size:20px;line-height:1.8;margin:10px 0}.dq-o{grid-template-columns:1fr}.dq-o .btn{text-align:right;font-size:18px;display:flex;gap:10px;align-items:center}.dq-o .btn b{color:var(--gold);min-width:1.2em}.dq-res{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin:12px 0}.dq-res h3{margin:0 0 6px}
 .soon{position:absolute;top:8px;left:8px;background:rgba(0,0,0,.65);color:#fff;font-size:11px;padding:2px 8px;border-radius:99px;text-decoration:none}
+.bkgo{display:block;background:#d4a537;color:#1b2a4a;font-weight:700;border-radius:12px;padding:10px 14px;margin:6px 0 10px;text-align:center;text-decoration:none}
+.bkf{display:flex;gap:8px;margin:8px 0 12px}.bkf input{flex:1;min-width:0;padding:10px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:inherit;font:inherit}.bkf button{padding:10px 16px;border-radius:10px;border:0;background:var(--line);color:inherit;font:inherit;font-weight:700}
+.bktoc{display:flex;flex-direction:column;gap:4px}.bku{display:flex;justify-content:space-between;background:var(--card);border:1px solid var(--line);border-right:6px solid #d4a537;border-radius:12px;padding:12px 14px;margin-top:10px;text-decoration:none;color:inherit}.bkl{display:flex;gap:8px;align-items:center;padding:9px 14px 9px 10px;margin-right:14px;border-bottom:1px dashed var(--line);text-decoration:none;color:inherit}.bkl span:first-child{flex:1}.bkl i{font-style:normal;font-size:.8em;color:#d4a537}
+.bkbar{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:8px 0}.bkbar form{display:flex;align-items:center;gap:6px}.bkbar input{width:64px;text-align:center;padding:7px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:inherit;font:inherit}.bkn{padding:8px 14px;border-radius:10px;background:var(--card);border:1px solid var(--line);text-decoration:none;color:inherit;font-weight:700}.bkn:not([href]){opacity:.35}
+.bkhint{font-size:.9em;color:#d4a537;margin:4px 0;min-height:1em}
+.bkp{position:relative;background:#fff;border-radius:8px;overflow:hidden;line-height:0;box-shadow:0 2px 12px rgba(0,0,0,.25)}.bkp img{width:100%;height:auto;display:block;min-height:200px}
+.hs{position:absolute;border:1.5px solid #d4a537;background:rgba(212,165,55,.10);border-radius:5px;animation:hsp 1.6s ease 2}.hs i{position:absolute;top:0;right:0;transform:translate(45%,-45%);width:14px;height:14px;border-radius:50%;background:#d4a537;color:#1b2a4a;font-style:normal;font-size:7px;line-height:14px;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,.35)}.hs:active{background:rgba(212,165,55,.35)}
+@keyframes hsp{50%{background:rgba(212,165,55,.35)}}
 </style>
 <link rel="stylesheet" href="katex/katex.min.css">
 <style>
@@ -184,7 +192,7 @@ const AR=n=>String(n).replace(/\d/g,d=>'٠١٢٣٤٥٦٧٨٩'[d]);
 const book=k=>DATA.find(b=>b.key===k);
 const gAllowed=k=>{const s=FBS;if(!s||s.admin||!s.prof||!Array.isArray(s.prof.grades)||!s.prof.grades.length)return true;return s.prof.grades.includes(k)};
 const DATAV=()=>DATA.filter(b=>gAllowed(b.key));
-function blockedHash(h){let m=h.match(/^qz-([A-Za-z0-9-]+)$/);if(m)return !gAllowed(qbk(m[1]));m=h.match(/^(?:hu|h[12]?|t[12]?)-([a-z0-9]+)/i)||h.match(/^([a-z0-9]+?)(?:-.+)?$/i);const b=m&&book(m[1]);return !!(b&&!gAllowed(b.key))}
+function blockedHash(h){let m=h.match(/^qz-([A-Za-z0-9-]+)$/);if(m)return !gAllowed(qbk(m[1]));m=h.match(/^bk-([a-z0-9]+)/);if(m)return !gAllowed(m[1]);m=h.match(/^(?:hu|h[12]?|t[12]?)-([a-z0-9]+)/i)||h.match(/^([a-z0-9]+?)(?:-.+)?$/i);const b=m&&book(m[1]);return !!(b&&!gAllowed(b.key))}
 function denied(){clearInterval(TM);document.title='غير مفعّل';app.innerHTML='<div class="empty" style="padding:40px 10px"><h2>🔒 هذا الصف غير مفعّل لحسابك</h2><p>حسابك مفعّل للصفوف اللي حددها الأستاذ أنس فقط.<br>للاستفسار تواصل معه: <b dir="ltr">0781507070</b></p><a class="btn gold" href="#">الرئيسية</a></div>'}
 function item(b,v,cur){return '<a class="vi'+(v.id===cur?' on':'')+'" href="#'+b.key+'-'+v.id+'"><span class="id">'+v.id+'</span><span class="t">'+esc(v.t)+'</span>'+(v.k==='ext'?'<span class="tag">مثال إضافي</span>':'')+'</a>'}
 const ICON={g1:['١','#ff7a7a'],g2:['٢','#ffa45c'],g3:['٣','#ffd24d'],g4:['٤','#a6e05a'],g5:['٥','#4fd18b'],g6:['٦','#3fd0c9'],g7:['٧','#4aa3ff'],g8:['٨','#8a8cff'],g9:['٩','#c07cff'],g10:['١٠','#ff7cc3'],f3:['١','#4aa3ff'],s3:['٢','#f6d77a'],b2:['٪','#5fd6a3']};
@@ -370,7 +378,7 @@ function hub(b,T){
  const G=GRADE[b.key],U=UNITS[b.key];document.title=G[0]+' — '+G[1];
  app.innerHTML='<div class="crumb"><a href="#">الرئيسية</a> ‹ <a href="#'+(T?'t-':'h-')+b.key+'">'+(T?'اختبارات ':'')+esc(G[0])+'</a> ‹ الفصل الأول</div><h1>'+(T?'اختبارات ':'')+esc(G[0])+' — '+esc(G[1])+'</h1><p class="sub">الفصل الدراسي الأول — اختر الوحدة:</p><div class="books" id="ul"></div>';
  const I=ICON[b.key]||['','#fff'];
- document.getElementById('ul').innerHTML=U.u.map((u,i)=>'<a class="ex" style="--c:'+I[1]+'" href="#'+(T?'t-'+b.key+'-u':'hu-'+b.key+'-')+(i+1)+'"><i>'+(i+1)+'</i><div><b>'+esc(u[0])+'</b><span>'+esc(T?'اختبارات تفاعلية وملفات PDF':(u[1]||'فيديوهات واختبارات'))+'</span></div></a>').join('');
+ document.getElementById('ul').innerHTML=(!T&&BKS[b.key]?'<a class="ex" style="--c:#d4a537" href="#bk-'+b.key+'"><i>📖</i><div><b>الكتاب التفاعلي</b><span>صفحات كتاب الطالب — اضغط على السؤال وشوف فيديو شرحه</span></div></a>':'')+U.u.map((u,i)=>'<a class="ex" style="--c:'+I[1]+'" href="#'+(T?'t-'+b.key+'-u':'hu-'+b.key+'-')+(i+1)+'"><i>'+(i+1)+'</i><div><b>'+esc(u[0])+'</b><span>'+esc(T?'اختبارات تفاعلية وملفات PDF':(u[1]||'فيديوهات واختبارات'))+'</span></div></a>').join('');
 }
 function unitPage(b,n){
  const G=GRADE[b.key],U=UNITS[b.key],u=U.u[n-1];document.title=u[0]+' — '+G[0];
@@ -656,7 +664,40 @@ function searchPage(q){
   box.innerHTML=o||'<div class="empty">ما في نتائج</div>'});
 }
 
-function toNew(){if(!/(^|\.)github\.io$/.test(location.hostname))return false;const m=decodeURIComponent(location.hash.replace('#','')).match(/^([a-z0-9]+?)-(.+)$/i),b=m&&book(m[1]);if(!b||VB[b.key]||!b.videos.some(x=>x.id===m[2]))return false;
+
+const BKS={f3:{t:'كتاب الطالب — الأول الثانوي',s:'الفصل الدراسي الأول',n:163,toc:[['الوحدة 1: الاقترانات والمقادير الجبرية',6,[['الدرس 1: الاقترانات المتشعّبة',8],['الدرس 2: حل معادلات القيمة المطلقة ومتبايناتها',19],['الدرس 3: نظريتا الباقي والعوامل',26],['الدرس 4: الكسور الجزئية',39],['اختبار نهاية الوحدة',48]]],['الوحدة 2: الاقترانات المثلثية',50,[['الدرس 1: قياس الزاوية بالراديان',52],['الدرس 2: الاقترانات المثلثية',63],['الدرس 3: تمثيل الاقترانات الجيبية بيانياً',76],['معمل برمجية جيوجبرا',89],['اختبار نهاية الوحدة',90]]],['الوحدة 3: النهايات والمشتقات',92,[['الدرس 1: النهايات والاتصال',94],['الدرس 2: الاشتقاق',108],['الدرس 3: القيم العظمى والصغرى',119],['الدرس 4: المشتقة الثانية وتطبيقاتها',128],['الدرس 5: تطبيقات القيم القصوى',137],['الدرس 6: قاعدة السلسلة',148],['اختبار نهاية الوحدة',158]]],['ملحقات',160,[]]]}};
+let BKM={};
+function bkMap(k){if(BKM[k])return Promise.resolve(BKM[k]);return sessFresh().then(()=>fetch('v/book/'+k+'/map.json?v=1',{credentials:'same-origin'})).then(r=>r.ok?r.json():[]).catch(()=>[]).then(m=>{const o={};(m||[]).forEach(x=>{(o[x.p]=o[x.p]||[]).push(x)});return BKM[k]=o})}
+function bkWhere(B,p){let u=null,l=null;B.toc.forEach(U=>{if(p>=U[1]){u=U;l=null;U[2].forEach(L=>{if(p>=L[1])l=L})}});return [u,l]}
+function bookPage(k,p){
+ const B=BKS[k],b=book(k);if(!B||!b)return home();const G=GRADE[k];
+ if(!p){document.title=B.t;const last=LS.get('bk-'+k);
+  let h='<div class="crumb"><a href="#">الرئيسية</a> ‹ <a href="#h1-'+k+'">'+esc(G[0])+'</a> ‹ الكتاب التفاعلي</div><h1>📖 '+esc(B.t)+'</h1><p class="sub">'+esc(B.s)+' — اضغط على أي سؤال عليه إطار ذهبي ▶ لتشوف فيديو شرحه</p>';
+  if(last)h+='<a class="bkgo" href="#bk-'+k+'-'+last+'">↩ كمّل من حيث وقفت — صفحة '+AR(last)+'</a>';
+  h+='<form class="bkf" onsubmit="event.preventDefault();const n=+this.n.value;if(n>=1&&n<='+B.n+')location.hash=\'bk-'+k+'-\'+n"><input name="n" type="number" inputmode="numeric" min="1" max="'+B.n+'" placeholder="رقم الصفحة"><button>اذهب للصفحة</button></form><div class="bktoc" id="bktoc">';
+  h+=B.toc.map(U=>'<a class="bku" href="#bk-'+k+'-'+U[1]+'"><b>'+esc(U[0])+'</b><span>'+AR(U[1])+'</span></a>'+U[2].map(L=>'<a class="bkl" href="#bk-'+k+'-'+L[1]+'"><span>'+esc(L[0])+'</span><i data-from="'+L[1]+'"></i><span>'+AR(L[1])+'</span></a>').join('')).join('')+'</div>';
+  app.innerHTML=h;
+  bkMap(k).then(M=>{const all=[];B.toc.forEach(U=>U[2].forEach(L=>all.push(L[1])));all.push(B.n+1);document.querySelectorAll('#bktoc i[data-from]').forEach(e=>{const a=+e.dataset.from,z=all.find(x=>x>a)||B.n+1;let c=0;for(let q=a;q<z;q++)c+=(M[q]||[]).length;if(c)e.textContent='🎬 '+AR(c)+' فيديو'})});
+  return}
+ p=Math.max(1,Math.min(B.n,p));LS.set('bk-'+k,p);try{sessionStorage.removeItem('bkret')}catch(e){}
+ const [U,L]=bkWhere(B,p),pad=n=>String(n).padStart(3,'0');document.title='صفحة '+p+' — '+B.t;
+ app.innerHTML='<div class="crumb"><a href="#">الرئيسية</a> ‹ <a href="#bk-'+k+'">الكتاب التفاعلي</a>'+(U?' ‹ '+esc(U[0].split(':')[0]):'')+(L?' ‹ '+esc(L[0]):'')+'</div>'
+  +'<div class="bkbar"><a class="bkn" '+(p>1?'href="#bk-'+k+'-'+(p-1)+'"':'')+'>› السابقة</a><form onsubmit="event.preventDefault();const n=+this.n.value;if(n>=1&&n<='+B.n+')location.hash=\'bk-'+k+'-\'+n"><input name="n" type="number" inputmode="numeric" value="'+p+'" min="1" max="'+B.n+'"><span>/ '+AR(B.n)+'</span></form><a class="bkn" '+(p<B.n?'href="#bk-'+k+'-'+(p+1)+'"':'')+'>التالية ‹</a></div>'
+  +'<div class="bkhint" id="bkh"></div><div class="bkp" id="bkp"><img id="bki" alt="صفحة '+p+'"></div>'
+  +'<div class="bkbar"><a class="bkn" '+(p>1?'href="#bk-'+k+'-'+(p-1)+'"':'')+'>› السابقة</a><a class="bkn" href="#bk-'+k+'">الفهرس</a><a class="bkn" '+(p<B.n?'href="#bk-'+k+'-'+(p+1)+'"':'')+'>التالية ‹</a></div>';
+ const img=document.getElementById('bki'),src=n=>'v/book/'+k+'/'+pad(n)+'.webp';let tries=0;
+ img.onerror=()=>{if(tries++<2)sessFresh(true).then(()=>{img.src=src(p)+'?r='+tries});else document.getElementById('bkp').innerHTML='<div class="empty">تعذّر تحميل الصفحة. <a href="javascript:location.reload()">أعد التحميل</a> أو تواصل معنا 0781507070</div>'};
+ sessFresh().then(()=>{img.src=src(p);[p+1,p-1].forEach(n=>{if(n>=1&&n<=B.n){const x=new Image();x.src=src(n)}})});
+ bkMap(k).then(M=>{const hs=M[p]||[],box=document.getElementById('bkp');if(!box)return;
+  hs.forEach(x=>{const a=document.createElement('a');a.className='hs';a.href='#'+k+'-'+x.v;a.title=x.lab||'';a.style.cssText='left:'+x.x+'%;top:'+x.y+'%;width:'+x.w+'%;height:'+x.h+'%';a.innerHTML='<i>▶</i>';a.onclick=()=>{try{sessionStorage.setItem('bkret',k+'|'+p)}catch(e){}};box.appendChild(a)});
+  const hh=document.getElementById('bkh');if(hh)hh.innerHTML=hs.length?'🎬 بهالصفحة '+AR(hs.length)+' '+(hs.length>2&&hs.length<11?'أسئلة':'سؤال')+' إلها فيديو شرح — اضغط على السؤال المحدد بالإطار الذهبي':'' });
+ let sx=null,sy=null;const P=document.getElementById('bkp');
+ P.addEventListener('touchstart',e=>{if(e.touches.length!==1){sx=null;return}sx=e.touches[0].clientX;sy=e.touches[0].clientY},{passive:true});
+ P.addEventListener('touchend',e=>{if(sx===null)return;const dx=e.changedTouches[0].clientX-sx,dy=e.changedTouches[0].clientY-sy;sx=null;if(Math.abs(dx)>70&&Math.abs(dx)>2*Math.abs(dy)&&(!window.visualViewport||visualViewport.scale<=1.05)){const n=dx<0?p-1:p+1;if(n>=1&&n<=B.n)location.hash='bk-'+k+'-'+n}},{passive:true});
+}
+function bkRet(){let r=null;try{r=sessionStorage.getItem('bkret')}catch(e){}if(!r)return;const [k,p]=r.split('|');const a=document.createElement('a');a.className='bkgo';a.href='#bk-'+k+'-'+p;a.textContent='↩ رجوع للكتاب — صفحة '+AR(p);app.insertBefore(a,app.firstChild)}
+
+function toNew(){if(!/(^|\.)github\.io$/.test(location.hostname))return false;if(/^#bk-/.test(location.hash)){app.innerHTML='<div class="empty">⏳ جاري تحويلك للمنصة الجديدة…</div>';location.replace('https://alraed-app.pages.dev/'+location.hash);return true}const m=decodeURIComponent(location.hash.replace('#','')).match(/^([a-z0-9]+?)-(.+)$/i),b=m&&book(m[1]);if(!b||VB[b.key]||!b.videos.some(x=>x.id===m[2]))return false;
  app.innerHTML='<div class="empty">⏳ جاري تحويلك للمنصة الجديدة…</div>';location.replace('https://alraed-app.pages.dev/'+location.hash);return true}
 function render(){
  if(toNew())return;
@@ -682,6 +723,7 @@ function render(){
  if(h==='ask'){clearInterval(TM);return askPage()}
  if(h==='diag'){clearInterval(TM);return diagPage()}
  if(h==='cards'){clearInterval(TM);return cardsPage()}
+ const bkm=h.match(/^bk-([a-z0-9]+)(?:-(\d+))?$/);if(bkm){clearInterval(TM);return bookPage(bkm[1],bkm[2]?+bkm[2]:0)}
  const chm=h.match(/^ch-([A-Za-z0-9]+)$/);if(chm){if(ST&&ST.ch===chm[1]&&!ST.done&&TM)return;return chPage(chm[1])}
  const sm=h.match(/^s-(.*)$/);if(sm){clearInterval(TM);return searchPage(sm[1])}
  clearInterval(TM);
@@ -696,7 +738,7 @@ function render(){
  const sm2=m[2].match(/^u([1-4])$/i);if(sm2&&b.lu)return shelf(b,'',+sm2[1]);
  const v=b.videos.find(x=>x.id===m[2]);
  if(!v)return shelf(b);
- player(b,v);
+ player(b,v);bkRet();
 }
 async function diagPage(){app.innerHTML='<h1>🔧 فحص</h1><pre id="dg" dir="ltr" style="white-space:pre-wrap;text-align:left;background:#0d1d3c;padding:12px;border-radius:10px;font-size:13px">...</pre>';const o=[],w=s=>{o.push(s);document.getElementById('dg').textContent=o.join('\n')};
  w('host: '+location.host+' | gated: '+GATED+' | user: '+!!(FBS&&FBS.user)+' | admin: '+!!(FBS&&FBS.admin)+' | stage: '+(FBS&&FBS.stage));
