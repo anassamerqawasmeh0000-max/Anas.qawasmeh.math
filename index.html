@@ -124,7 +124,7 @@ footer{text-align:center;color:var(--mut);font-size:14px;padding:20px 16px 40px}
 .sc1 .rl{margin-top:6px;background:rgba(167,139,250,.12);border-radius:8px;padding:6px 10px}
 .st1{display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-bottom:1px dashed var(--line)}.st1:last-child{border-bottom:0}.st1>i{font-style:normal;background:#3b82f6;color:#fff;border-radius:50%;min-width:26px;height:26px;line-height:26px;text-align:center;font-weight:700;margin-top:4px}.st1>div{flex:1;min-width:0}.st1 .sy{color:var(--mut,#c9d3e6)}
 .bfig{display:block;max-width:100%;margin:8px auto 2px;background:#fff;border-radius:10px;padding:4px}
-.skb{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin:8px 0}.skb .btn{padding:8px 10px}.skb .btn.on{background:#d4a537;color:#1b2a4a}
+.skb{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin:8px 0}.skb .btn{padding:8px 14px;min-width:64px;font-size:16px}.skb .btn.on{background:#d4a537;color:#1b2a4a}
 .bkp{perspective:1600px}.bkp img{backface-visibility:hidden}
 .flipo{position:absolute;inset:0;width:100%;height:100%;z-index:3;transform-origin:right center;animation:flipo .55s cubic-bezier(.4,.1,.3,1) forwards;box-shadow:0 0 30px rgba(0,0,0,.4)}
 @keyframes flipo{0%{transform:rotateY(0);filter:brightness(1)}100%{transform:rotateY(-110deg);filter:brightness(.55);opacity:.2}}
@@ -439,18 +439,23 @@ function player(b,v){
  const prev=same[i-1],next=same[i+1];
  const vp='v/'+b.key+'/'+(v.a||v.id)+'.mp4',src=(VB[b.key]||'')+vp;
  app.innerHTML='<div class="crumb"><a href="#">الرئيسية</a> ‹ <a href="#'+b.key+'">'+esc(b.title)+'</a></div><h1>'+esc(v.t)+'</h1><p class="sub">'+esc(b.lessons[v.l]||'')+' — سؤال '+esc(v.id)+'</p>'
- +'<div class="pl" id="plw"><video id="vid" controls controlsList="nodownload nofullscreen noremoteplayback" disablePictureInPicture oncontextmenu="return false" playsinline preload="metadata"></video><div id="verr"></div><div id="wm"></div></div>'
+ +'<div class="pl" id="plw" dir="ltr"><video id="vid" controls controlsList="nodownload nofullscreen noremoteplayback" disablePictureInPicture oncontextmenu="return false" playsinline preload="metadata"></video><div id="verr"></div><div id="wm"></div></div>'
  +'<div class="ctl"><button class="btn" id="fsb">⛶ ملء الشاشة</button><span style="color:var(--mut)">السرعة:</span>'+[0.75,1,1.25,1.5].map(r=>'<button class="btn'+(r===1?' on':'')+'" data-r="'+r+'">'+AR(r).replace('.','٫')+'×</button>').join('')+'</div>'
  +'<div class="qnav"><button class="btn" id="askv">💬 مش فاهم؟ اسأل الأستاذ عن هالسؤال</button></div><div class="note">الفيديو بدون صوت. اقرأ الشرح المكتوب في كل خطوة، وأوقف الفيديو في أي وقت بشريط التشغيل، وارجع لأي خطوة بالسحب.</div>'
  +'<div class="nav">'+(prev?'<a class="btn" href="#'+b.key+'-'+prev.id+'">› السؤال السابق</a>':'')+(next?'<a class="btn" href="#'+b.key+'-'+next.id+'">السؤال التالي ‹</a>':'')+'</div>'
  +'<div class="lh"><span>باقي أسئلة نفس الدرس</span></div><div class="list">'+same.map(x=>item(b,x,v.id)).join('')+'</div>';
  try{FB.logView({k:b.key,id:v.id,t:v.t})}catch(e){}
  document.getElementById('askv').onclick=()=>askGo('#'+b.key+'-'+v.id,v.t+' ('+GRADE[b.key][0]+')');
- const vid=document.getElementById('vid');vidLoad(vid,src,vp);
+ const vid=document.getElementById('vid');vidLoad(vid,src,vp);{const w=document.getElementById('plw');if(w)w.after(skipBar(vid))}
  app.querySelectorAll('[data-r]').forEach(bt=>bt.onclick=()=>{vid.playbackRate=+bt.dataset.r;app.querySelectorAll('[data-r]').forEach(x=>x.classList.toggle('on',x===bt))});
  wmStart(vid);const fb=document.getElementById('fsb'),pw=document.getElementById('plw');fb.onclick=()=>{const r=pw.requestFullscreen||pw.webkitRequestFullscreen;if(r)r.call(pw).catch(()=>{});else if(vid.webkitEnterFullscreen)vid.webkitEnterFullscreen()};
  window.scrollTo(0,0);
 }
+
+function skipBar(vid){const d=document.createElement('div');d.className='skb';d.dir='ltr';
+ d.innerHTML='<button class="btn" dir="ltr" data-k="-5" aria-label="رجوع 5 ثواني">⏪ 5s</button><button class="btn" data-k="0" aria-label="تشغيل/إيقاف">⏯</button><button class="btn" dir="ltr" data-k="5" aria-label="تقديم 5 ثواني">5s ⏩</button>';
+ d.querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>{const k=+b.dataset.k;if(!k){vid.paused?vid.play().catch(()=>{}):vid.pause();return}try{const t=Math.max(0,Math.min((isFinite(vid.duration)?vid.duration:1e9)-0.1,vid.currentTime+k));if(vid.fastSeek&&false)vid.fastSeek(t);else vid.currentTime=t}catch(e){}});
+ return d}
 function vidLoad(vid,src,vp){let n=0;const set=u=>{vid.src=u;vid.load()};
  vid.onerror=()=>{if(!document.body.contains(vid))return;n++;
   if(n===1&&src!==vp){set(vp);return}
@@ -745,9 +750,9 @@ function bkOpen(k,p,x){bkClose();const m=document.createElement('div');m.id='bkm
   document.getElementById('bkask').onclick=()=>{bkClose();askGo('#bk-'+k+'-'+p,(x.lab||'سؤال')+' — صفحة '+p+' ('+GRADE[k][0]+')')}};
  const showV=()=>{const vp=x.v?'v/'+k+'/'+x.v+'.mp4':(x.nv?'v/book/'+k+'/vid/'+x.id+'.mp4':'');
   if(!vp){body.innerHTML='<div class="empty">🎬 فيديو هالسؤال قيد التجهيز. اقرأ الحل المكتوب لحد ما يجهز.</div>';return}
-  body.innerHTML='<div class="pl" id="plw"><video id="vid" controls controlsList="nodownload noremoteplayback" disablePictureInPicture oncontextmenu="return false" playsinline preload="metadata"></video><div id="verr"></div><div id="wm"></div></div><div class="skb"><button class="btn" data-sk="-10">⏪ ١٠ ث</button>'+(sol&&sol.tm?'<button class="btn" data-st="-1">› الخطوة السابقة</button><button class="btn" data-st="1">الخطوة التالية ‹</button>':'')+'<button class="btn" data-sk="10">١٠ ث ⏩</button></div><div class="skb">'+[0.75,1,1.25,1.5].map(r=>'<button class="btn'+(r===1?' on':'')+'" data-rr="'+r+'">'+AR(r).replace('.','٫')+'×</button>').join('')+'</div><div class="note">الفيديو بدون صوت: تابع الشرح المكتوب على الشاشة. اسحب شريط الفيديو أو استعمل الأزرار لتقدّم وترجع.</div>';
+  body.innerHTML='<div class="pl" id="plw" dir="ltr"><video id="vid" controls controlsList="nodownload noremoteplayback" disablePictureInPicture oncontextmenu="return false" playsinline preload="metadata"></video><div id="verr"></div><div id="wm"></div></div><div class="skb" dir="ltr"><button class="btn" dir="ltr" data-sk="-5">⏪ 5s</button><button class="btn" data-pp="1">⏯</button><button class="btn" dir="ltr" data-sk="5">5s ⏩</button></div>'+(sol&&sol.tm?'<div class="skb"><button class="btn" data-st="-1">› الخطوة السابقة</button><button class="btn" data-st="1">الخطوة التالية ‹</button></div>':'')+'<div class="skb">'+[0.75,1,1.25,1.5].map(r=>'<button class="btn'+(r===1?' on':'')+'" data-rr="'+r+'">'+AR(r).replace('.','٫')+'×</button>').join('')+'</div><div class="note">الفيديو بدون صوت: تابع الشرح المكتوب على الشاشة. اسحب شريط الفيديو أو استعمل الأزرار لتقدّم وترجع.</div>';
   const vid=document.getElementById('vid');
-  body.querySelectorAll('[data-sk]').forEach(b=>b.onclick=()=>{try{vid.currentTime=Math.max(0,Math.min((vid.duration||1e9)-0.1,vid.currentTime+ +b.dataset.sk))}catch(e){}});
+  body.querySelectorAll('[data-pp]').forEach(b=>b.onclick=()=>{vid.paused?vid.play().catch(()=>{}):vid.pause()});body.querySelectorAll('[data-sk]').forEach(b=>b.onclick=()=>{try{vid.currentTime=Math.max(0,Math.min((vid.duration||1e9)-0.1,vid.currentTime+ +b.dataset.sk))}catch(e){}});
   body.querySelectorAll('[data-rr]').forEach(b=>b.onclick=()=>{vid.playbackRate=+b.dataset.rr;body.querySelectorAll('[data-rr]').forEach(x=>x.classList.toggle('on',x===b))});
   body.querySelectorAll('[data-st]').forEach(b=>b.onclick=()=>{const T=sol.tm,c=vid.currentTime;let i=T.length-1;while(i>0&&T[i]>c+0.3)i--;const j=Math.max(0,Math.min(T.length-1,i+ +b.dataset.st));vid.currentTime=T[j]+0.05;if(vid.paused)vid.play().catch(()=>{})});vidLoad(vid,vp,vp);try{wmStart(vid)}catch(e){}try{FB.logView({k:k,id:x.v||x.id,t:'الكتاب ص'+p+': '+(x.lab||'')})}catch(e){}};
  const tab=t=>{m.querySelectorAll('[data-t]').forEach(b=>b.classList.toggle('on',b.dataset.t===t));t==='v'?showV():showS()};
