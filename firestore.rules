@@ -1,0 +1,63 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{db}/documents {
+    function signed() { return request.auth != null; }
+    function admin() { return signed() && request.auth.token.email == 'anassamerqawasmeh0000@gmail.com' && request.auth.token.email_verified == true; }
+    function approved() { return signed() && get(/databases/$(db)/documents/users/$(request.auth.uid)).data.status == 'approved'; }
+
+    function open() { return get(/databases/$(db)/documents/cfg/open).data.open == true; }
+
+    match /cfg/{d} {
+      allow read: if true;
+      allow write: if admin();
+    }
+    match /users/{uid} {
+      allow read: if admin() || (signed() && request.auth.uid == uid);
+      allow create: if signed() && request.auth.uid == uid
+        && request.resource.data.status == 'pending'
+        && request.resource.data.keys().hasOnly(['name','phone','email','status','createdAt','lastSeen','stage'])
+        && (!('stage' in request.resource.data) || (request.resource.data.stage is string && request.resource.data.stage.size() <= 30));
+      allow update: if admin() || (signed() && request.auth.uid == uid
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['lastSeen','stage'])
+        && (!('stage' in request.resource.data) || (request.resource.data.stage is string && request.resource.data.stage.size() <= 30)));
+      allow delete: if admin();
+      match /kv/{k} {
+        allow read, write: if admin() || (signed() && request.auth.uid == uid && approved());
+      }
+    }
+    match /qz/{d} {
+      allow read: if admin() || approved() || open();
+      allow write: if admin();
+    }
+    match /att/{d} {
+      allow create: if approved() && request.resource.data.uid == request.auth.uid;
+      allow read: if admin() || (signed() && resource.data.uid == request.auth.uid);
+      allow delete: if admin();
+    }
+    match /vw/{d} {
+      allow create: if approved() && request.resource.data.uid == request.auth.uid;
+      allow read, delete: if admin();
+    }
+    match /ask/{d} {
+      allow create: if approved() && request.resource.data.uid == request.auth.uid
+        && request.resource.data.keys().hasOnly(['uid','name','at','text','img','ref','rt'])
+        && request.resource.data.text is string && request.resource.data.text.size() <= 1000
+        && (!('img' in request.resource.data) || (request.resource.data.img is string && request.resource.data.img.size() <= 400000));
+      allow read: if admin() || (signed() && resource.data.uid == request.auth.uid);
+      allow update: if admin() || (signed() && resource.data.uid == request.auth.uid
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['seen']));
+      allow delete: if admin();
+    }
+    match /ch/{d} {
+      allow read: if admin() || approved();
+      allow create: if approved() && request.resource.data.by == request.auth.uid
+        && request.resource.data.keys().hasOnly(['qid','title','by','name','at','res'])
+        && request.resource.data.res.keys().hasOnly([request.auth.uid]);
+      allow update: if approved()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['res'])
+        && request.resource.data.res.diff(resource.data.res).affectedKeys().hasOnly([request.auth.uid])
+        && !(request.auth.uid in resource.data.res);
+      allow delete: if admin();
+    }
+  }
+}
